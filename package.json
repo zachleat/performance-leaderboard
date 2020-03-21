@@ -1,0 +1,29 @@
+{
+  "name": "performance-leaderboard",
+  "version": "1.0.0",
+  "main": "performance-leaderboard.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "sample": "node test/sample"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zachleat/performance-leaderboard.git"
+  },
+  "keywords": ["performance", "lighthouse"],
+  "author": {
+    "name": "Zach Leatherman",
+    "email": "zachleatherman@gmail.com",
+    "url": "https://zachleat.com/"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zachleat/performance-leaderboard/issues"
+  },
+  "homepage": "https://github.com/zachleat/performance-leaderboard#readme",
+  "dependencies": {
+    "chrome-launcher": "^0.13.0",
+    "fs-extra": "^9.0.0",
+    "lighthouse": "^5.6.0"
+  }
+}
