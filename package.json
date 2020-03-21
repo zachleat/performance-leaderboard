@@ -10,7 +10,10 @@
     "type": "git",
     "url": "git+https://github.com/zachleat/performance-leaderboard.git"
   },
-  "keywords": ["performance", "lighthouse"],
+  "keywords": [
+    "performance",
+    "lighthouse"
+  ],
   "author": {
     "name": "Zach Leatherman",
     "email": "zachleatherman@gmail.com",
@@ -23,7 +26,6 @@
   "homepage": "https://github.com/zachleat/performance-leaderboard#readme",
   "dependencies": {
     "chrome-launcher": "^0.13.0",
-    "fs-extra": "^9.0.0",
     "lighthouse": "^5.6.0"
   }
 }

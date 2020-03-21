@@ -1,4 +1,3 @@
-const fs = require("fs-extra");
 const lighthouse = require("lighthouse");
 const chromeLauncher = require("chrome-launcher");
 
