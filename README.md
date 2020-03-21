@@ -16,16 +16,19 @@ npm install performance-leaderboard
 const PerfLeaderboard = require("performance-leaderboard");
 
 (async function() {
-	let urls = new Set();
+	let urls = [
+		"https://www.gatsbyjs.org/",
+		"https://nextjs.org/",
+		"https://www.11ty.dev/",
+		"https://vuejs.org/",
+		"https://reactjs.org/",
+		"https://amp.dev/"
+	];
 
-	urls.add("https://www.gatsbyjs.org/");
-	urls.add("https://nextjs.org/");
-	urls.add("https://www.11ty.dev/");
-	urls.add("https://vuejs.org/");
-	urls.add("https://reactjs.org/");
-	urls.add("https://amp.dev/");
+	console.log( await PerfLeaderboard(urls) );
 
-	console.log( await PerfLeaderboard(Array.from(urls)) );
+	// Run each site 5 times (default is 3)
+	console.log( await PerfLeaderboard(urls, 5) );
 })();
 ```
 
