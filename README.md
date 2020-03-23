@@ -16,6 +16,7 @@ npm install performance-leaderboard
 const PerfLeaderboard = require("performance-leaderboard");
 
 (async function() {
+
 	let urls = [
 		"https://www.gatsbyjs.org/",
 		"https://nextjs.org/",
@@ -27,7 +28,8 @@ const PerfLeaderboard = require("performance-leaderboard");
 		"https://nuxtjs.org/",
 		"https://gridsome.org/",
 		"https://svelte.dev/",
-		"https://gohugo.io/"
+		"https://gohugo.io/",
+		"https://redwoodjs.com/"
 	];
 
 	console.log( await PerfLeaderboard(urls) );
@@ -38,3 +40,7 @@ const PerfLeaderboard = require("performance-leaderboard");
 ```
 
 2. Run `node sample.js`.
+
+## Experiments
+
+* Maybe switch to use [Puppeteer for headless testing](https://github.com/GoogleChrome/lighthouse/blob/master/docs/puppeteer.md) instead of `chrome-launcher`

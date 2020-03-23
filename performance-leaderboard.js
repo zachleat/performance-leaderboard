@@ -1,66 +1,10 @@
 const lighthouse = require("lighthouse");
 const chromeLauncher = require("chrome-launcher");
+const ResultLogger = require("./src/ResultLogger");
 
 const NUMBER_OF_RUNS = 3;
 
-class ResultLogger {
-  constructor() {
-    this.results = {};
-  }
 
-  static sortResultData(a, b) {
-    if(b.lighthouseScore === a.lighthouseScore) {
-      return a.speedIndex - b.speedIndex;
-    }
-    return b.lighthouseScore - a.lighthouseScore
-  }
-
-
-  add(url, rawResult) {
-    if(!this.results[url]) {
-      this.results[url] = [];
-    }
-    this.results[url].push(this.mapResult(rawResult));
-  }
-
-  mapResult(result) {
-    if(result.requestedUrl.startsWith("https://github.com/")) {
-      return {
-        url: result.requestedUrl
-      };
-    }
-
-    return {
-      url: result.requestedUrl,
-      finalUrl: result.finalUrl,
-      lighthouseScore: result.categories.performance.score,
-      firstContentfulPaint: result.audits['first-contentful-paint'].numericValue,
-      firstMeaningfulPaint: result.audits['first-meaningful-paint'].numericValue,
-      speedIndex: result.audits['speed-index'].numericValue,
-    };
-  }
-
-  getMedianResultForUrl(url) {
-    if(this.results[url] && this.results[url].length) {
-      // Log all runs
-      // console.log( this.results[url] );
-      return this.results[url].filter(() => true).sort(ResultLogger.sortResultData)[Math.floor(this.results[url].length / 2)];
-    }
-  }
-
-  getFinalSortedResults() {
-    let finalResults = [];
-    for(let url in this.results) {
-      finalResults.push(this.getMedianResultForUrl(url));
-    }
-    finalResults.sort(ResultLogger.sortResultData).map((entry, index) => {
-      entry.rank = index + 1;
-      return entry;
-    });
-
-    return finalResults;
-  }
-}
 
 async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS) {
   let opts = {
@@ -80,8 +24,12 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS) {
 
     for(let url of urls) {
       console.log( `(Site ${++count} of ${urls.length}, run ${j+1} of ${numberOfRuns}): ${url}` );
-      let rawResult = await lighthouse(url, opts, config).then(results => results.lhr);
-      resultLog.add(url, rawResult);
+      try {
+        let rawResult = await lighthouse(url, opts, config).then(results => results.lhr);
+        resultLog.add(url, rawResult);
+      } catch(e) {
+        resultLog.addError(url, e);
+      }
     }
 
     await chrome.kill();
