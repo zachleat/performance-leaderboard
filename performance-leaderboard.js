@@ -1,20 +1,29 @@
-const fsp = require("fs").promises;
+const fs = require("fs-extra");
+const path = require("path");
 const slugify = require("slugify");
 const lighthouse = require("lighthouse");
 const chromeLauncher = require("chrome-launcher");
 const ResultLogger = require("./src/ResultLogger");
 
 const NUMBER_OF_RUNS = 3;
+const LOG_DIRECTORY = ".log";
 
-function writeLog(fileSlug, rawResult) {
+async function writeLog(fileSlug, rawResult, logDirectory) {
   let date = new Date().toISOString().substr(0, 10);
-  return fsp.writeFile(`log/${date}-${fileSlug}`, JSON.stringify(rawResult, null, 2));
+  let dir = path.join(path.resolve("."), logDirectory, date);
+  await fs.ensureDir(dir);
+
+  let filepath = path.join(dir, `${fileSlug}`);
+  return fs.writeJson(filepath, rawResult, { spaces: 2 });
 }
 
-async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS) {
-  let opts = {
-    onlyCategories: ["performance", "accessibility"]
-  };
+async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) {
+  let opts = Object.assign({
+    writeLogs: true,
+    logDirectory: LOG_DIRECTORY,
+    onlyCategories: ["performance", "accessibility"],
+    chromeFlags: ['--headless']
+  }, options);
   let config = null;
   let resultLog = new ResultLogger();
 
@@ -32,7 +41,9 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS) {
       try {
         let rawResult = await lighthouse(url, opts, config).then(results => results.lhr);
         resultLog.add(url, rawResult);
-        await writeLog(`${slugify(url)}-${j+1}-of-${numberOfRuns}.json`, rawResult);
+        if(opts.writeLogs) {
+          await writeLog(`${slugify(url)}-${j+1}-of-${numberOfRuns}.json`, rawResult, opts.logDirectory);
+        }
       } catch(e) {
         console.log( `Logged an error with ${url}: `, e );
         resultLog.addError(url, e);

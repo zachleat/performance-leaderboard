@@ -12,9 +12,9 @@ const PerfLeaderboard = require("../.");
 		"https://nuxtjs.org/",
 		"https://gridsome.org/",
 		"https://svelte.dev/",
-		"https://gohugo.io/"
+		"https://gohugo.io/",
 		"https://redwoodjs.com/"
 	];
 
-	console.log( await PerfLeaderboard(urls, 5) );
+	console.log( await PerfLeaderboard(urls, 1) );
 })();
