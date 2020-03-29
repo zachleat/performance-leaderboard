@@ -1,14 +1,19 @@
+const fsp = require("fs").promises;
+const slugify = require("slugify");
 const lighthouse = require("lighthouse");
 const chromeLauncher = require("chrome-launcher");
 const ResultLogger = require("./src/ResultLogger");
 
 const NUMBER_OF_RUNS = 3;
 
-
+function writeLog(fileSlug, rawResult) {
+  let date = new Date().toISOString().substr(0, 10);
+  return fsp.writeFile(`log/${date}-${fileSlug}`, JSON.stringify(rawResult, null, 2));
+}
 
 async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS) {
   let opts = {
-    onlyCategories: ["performance"]
+    onlyCategories: ["performance", "accessibility"]
   };
   let config = null;
   let resultLog = new ResultLogger();
@@ -27,7 +32,9 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS) {
       try {
         let rawResult = await lighthouse(url, opts, config).then(results => results.lhr);
         resultLog.add(url, rawResult);
+        await writeLog(`${slugify(url)}-${j+1}-of-${numberOfRuns}.json`, rawResult);
       } catch(e) {
+        console.log( `Logged an error with ${url}: `, e );
         resultLog.addError(url, e);
       }
     }

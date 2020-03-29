@@ -3,7 +3,7 @@ class ResultLogger {
     this.results = {};
   }
 
-  static sortResultData(a, b) {
+  _getErrorSort(a, b) {
     if(b.error && a.error) {
       return 0;
     } else if(b.error) {
@@ -11,11 +11,30 @@ class ResultLogger {
     } else if(a.error) {
       return 1;
     }
+  }
+
+  sortByAccessibility(a, b) {
+    if(a.error || b.error) {
+      return this._getErrorSort(a, b);
+    }
+
+    if(b.accessibilityScore === a.accessibilityScore) {
+      return this.sortByPerformance(a, b);
+    }
+    return b.accessibilityScore - a.accessibilityScore;
+  }
+
+  sortByPerformance(a, b) {
+    if(a.error || b.error) {
+      return this._getErrorSort(a, b);
+    }
 
     if(b.lighthouseScore === a.lighthouseScore) {
+      // lower speed index scores are better
       return a.speedIndex - b.speedIndex;
     }
-    return b.lighthouseScore - a.lighthouseScore
+    // higher lighthouse scores are better
+    return b.lighthouseScore - a.lighthouseScore;
   }
 
   _add(url, result) {
@@ -48,33 +67,54 @@ class ResultLogger {
       url: result.requestedUrl,
       finalUrl: result.finalUrl,
       lighthouseScore: result.categories.performance.score,
+      accessibilityScore: result.categories.accessibility.score,
       firstContentfulPaint: result.audits['first-contentful-paint'].numericValue,
       firstMeaningfulPaint: result.audits['first-meaningful-paint'].numericValue,
       speedIndex: result.audits['speed-index'].numericValue,
     };
   }
 
-  getMedianResultForUrl(url) {
+  getMedianResultForUrl(url, sortFn) {
     if(this.results[url] && this.results[url].length) {
       // Log all runs
       // console.log( this.results[url] );
-      return this.results[url].filter(() => true).sort(ResultLogger.sortResultData)[Math.floor(this.results[url].length / 2)];
+      return this.results[url].filter(() => true).sort(sortFn)[Math.floor(this.results[url].length / 2)];
     }
   }
 
   getFinalSortedResults() {
-    let finalResults = [];
+    let perfResults = [];
+    let sortFn = this.sortByPerformance.bind(this);
     for(let url in this.results) {
-      finalResults.push(this.getMedianResultForUrl(url));
+      perfResults.push(this.getMedianResultForUrl(url, sortFn));
     }
-    finalResults.sort(ResultLogger.sortResultData).map((entry, index) => {
+    perfResults.sort(sortFn).map((entry, index) => {
       if(entry) {
         entry.rank = index + 1;
+        entry.performanceRank = index + 1;
       }
       return entry;
     });
 
-    return finalResults;
+    // Insert accessibilityRank into perfResults
+    let a11yResults = [];
+    sortFn = this.sortByAccessibility.bind(this);
+    for(let url in this.results) {
+      a11yResults.push(this.getMedianResultForUrl(url, sortFn));
+    }
+    a11yResults.sort(sortFn).forEach((entry, index) => {
+      if(entry) {
+        for(let perfResult of perfResults) {
+          if(perfResult.url === entry.url) {
+            entry.accessibilityRank = index + 1;
+            perfResult.accessibilityRank = index + 1;
+            return;
+          }
+        }
+      }
+    });
+
+    return perfResults;
   }
 }
 
