@@ -71,6 +71,12 @@ class ResultLogger {
       firstContentfulPaint: result.audits['first-contentful-paint'].numericValue,
       firstMeaningfulPaint: result.audits['first-meaningful-paint'].numericValue,
       speedIndex: result.audits['speed-index'].numericValue,
+      totalWeight: result.audits['speed-index'].numericValue,
+      diagnostics: result.audits.diagnostics.details.items[0],
+      // TODO size of HTML, JS, CSS, Web Fonts
+      // weights: {
+      //   mainDocument: result.audits.diagnostics.details.items[0].mainDocumentTransferSize
+      // }
     };
   }
 
