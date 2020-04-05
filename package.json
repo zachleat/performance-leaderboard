@@ -25,9 +25,11 @@
   },
   "homepage": "https://github.com/zachleat/performance-leaderboard#readme",
   "dependencies": {
+    "axe-puppeteer": "^1.0.0",
     "chrome-launcher": "^0.13.0",
     "fs-extra": "^9.0.0",
     "lighthouse": "^5.6.0",
+    "puppeteer": "^2.1.1",
     "slugify": "^1.4.0"
   }
 }

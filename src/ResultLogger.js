@@ -1,6 +1,24 @@
+const AxeTester = require("./AxeTester");
+
 class ResultLogger {
   constructor() {
     this.results = {};
+  }
+
+  set writeLogs(doWrite) {
+    this._writeLogs = doWrite;
+  }
+
+  get writeLogs() {
+    return this._writeLogs;
+  }
+
+  set logDirectory(dir) {
+    this._logDir = dir;
+  }
+
+  get logDirectory() {
+    return this._logDir;
   }
 
   _getErrorSort(a, b) {
@@ -19,7 +37,14 @@ class ResultLogger {
     }
 
     if(b.accessibilityScore === a.accessibilityScore) {
-      return this.sortByPerformance(a, b);
+      if( b.axe.violtions === a.axe.violations ) {
+        // higher is better
+        // TODO if this is equal, sort by performance?
+        return b.axe.passes - a.axe.passes;
+      }
+
+      // lower is better
+      return a.axe.violations - b.axe.violations;
     }
     return b.accessibilityScore - a.accessibilityScore;
   }
@@ -71,7 +96,7 @@ class ResultLogger {
       firstContentfulPaint: result.audits['first-contentful-paint'].numericValue,
       firstMeaningfulPaint: result.audits['first-meaningful-paint'].numericValue,
       speedIndex: result.audits['speed-index'].numericValue,
-      totalWeight: result.audits['speed-index'].numericValue,
+      totalWeight: result.audits.diagnostics.details.items[0].totalByteWeight,
       diagnostics: result.audits.diagnostics.details.items[0],
       // TODO size of HTML, JS, CSS, Web Fonts
       // weights: {
@@ -88,13 +113,13 @@ class ResultLogger {
     }
   }
 
-  getFinalSortedResults() {
+  async getFinalSortedResults() {
     let perfResults = [];
-    let sortFn = this.sortByPerformance.bind(this);
+    let sortByPerfFn = this.sortByPerformance.bind(this);
     for(let url in this.results) {
-      perfResults.push(this.getMedianResultForUrl(url, sortFn));
+      perfResults.push(this.getMedianResultForUrl(url, sortByPerfFn));
     }
-    perfResults.sort(sortFn).map((entry, index) => {
+    perfResults.sort(sortByPerfFn).map((entry, index) => {
       if(entry) {
         entry.rank = index + 1;
         entry.performanceRank = index + 1;
@@ -104,11 +129,22 @@ class ResultLogger {
 
     // Insert accessibilityRank into perfResults
     let a11yResults = [];
-    sortFn = this.sortByAccessibility.bind(this);
+    let axeTester = new AxeTester();
+    axeTester.logDirectory = this.logDirectory;
+    axeTester.writeLogs = this.writeLogs;
+
+    await axeTester.start();
+
+    let sortByA11yFn = this.sortByAccessibility.bind(this);
     for(let url in this.results) {
-      a11yResults.push(this.getMedianResultForUrl(url, sortFn));
+      let result = this.getMedianResultForUrl(url, sortByA11yFn);
+      result.axe = await axeTester.fetchResults(url);
+      a11yResults.push(result);
     }
-    a11yResults.sort(sortFn).forEach((entry, index) => {
+
+    await axeTester.finish();
+
+    a11yResults.sort(sortByA11yFn).forEach((entry, index) => {
       if(entry) {
         for(let perfResult of perfResults) {
           if(perfResult.url === entry.url) {

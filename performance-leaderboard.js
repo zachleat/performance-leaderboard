@@ -1,21 +1,12 @@
-const fs = require("fs-extra");
-const path = require("path");
 const slugify = require("slugify");
 const lighthouse = require("lighthouse");
 const chromeLauncher = require("chrome-launcher");
 const ResultLogger = require("./src/ResultLogger");
+const writeLog = require("./src/WriteLog");
 
 const NUMBER_OF_RUNS = 3;
 const LOG_DIRECTORY = ".log";
 
-async function writeLog(fileSlug, rawResult, logDirectory) {
-  let date = new Date().toISOString().substr(0, 10);
-  let dir = path.join(path.resolve("."), logDirectory, date);
-  await fs.ensureDir(dir);
-
-  let filepath = path.join(dir, `${fileSlug}`);
-  return fs.writeJson(filepath, rawResult, { spaces: 2 });
-}
 
 async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) {
   let opts = Object.assign({
@@ -25,7 +16,10 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
     chromeFlags: ['--headless']
   }, options);
   let config = null;
+
   let resultLog = new ResultLogger();
+  resultLog.logDirectory = opts.logDirectory;
+  resultLog.writeLogs = opts.writeLogs;
 
   console.log( `Testing ${urls.length} sites:` );
 
@@ -41,8 +35,9 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
       try {
         let rawResult = await lighthouse(url, opts, config).then(results => results.lhr);
         resultLog.add(url, rawResult);
+
         if(opts.writeLogs) {
-          await writeLog(`${slugify(url)}-${j+1}-of-${numberOfRuns}.json`, rawResult, opts.logDirectory);
+          await writeLog(`lighthouse-${slugify(url)}-${j+1}-of-${numberOfRuns}.json`, rawResult, opts.logDirectory);
         }
       } catch(e) {
         console.log( `Logged an error with ${url}: `, e );
@@ -50,10 +45,12 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
       }
     }
 
+    // Note that this needs to kill between runs for a fresh chrome profile
+    // We don’t want the second run to be a repeat full-cache serviceworker view
     await chrome.kill();
   }
 
-  return resultLog.getFinalSortedResults();
+  return await resultLog.getFinalSortedResults();
 }
 
 module.exports = runLighthouse;
