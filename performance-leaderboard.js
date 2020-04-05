@@ -3,6 +3,7 @@ const lighthouse = require("lighthouse");
 const chromeLauncher = require("chrome-launcher");
 const ResultLogger = require("./src/ResultLogger");
 const writeLog = require("./src/WriteLog");
+const readLog = require("./src/ReadLog");
 
 const NUMBER_OF_RUNS = 3;
 const LOG_DIRECTORY = ".log";
@@ -12,6 +13,7 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
   let opts = Object.assign({
     writeLogs: true,
     logDirectory: LOG_DIRECTORY,
+    readFromLogDirectory: false,
     onlyCategories: ["performance", "accessibility"],
     chromeFlags: ['--headless']
   }, options);
@@ -27,27 +29,39 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
   // kill the chrome instance between runs of the same site
   for(let j = 0; j < numberOfRuns; j++) {
     let count = 0;
-    let chrome = await chromeLauncher.launch({chromeFlags: opts.chromeFlags});
-    opts.port = chrome.port;
+    let chrome;
+    if(!opts.readFromLogDirectory) {
+      chrome = await chromeLauncher.launch({chromeFlags: opts.chromeFlags});
+      opts.port = chrome.port;
+    }
 
     for(let url of urls) {
       console.log( `(Site ${++count} of ${urls.length}, run ${j+1} of ${numberOfRuns}): ${url}` );
       try {
-        let rawResult = await lighthouse(url, opts, config).then(results => results.lhr);
-        resultLog.add(url, rawResult);
+        let filename = `lighthouse-${slugify(url)}-${j+1}-of-${numberOfRuns}.json`;
+        let rawResult;
+        if(opts.readFromLogDirectory) {
+          rawResult = readLog(filename, opts.logDirectory);
+        } else {
+          rawResult = await lighthouse(url, opts, config).then(results => results.lhr);
 
-        if(opts.writeLogs) {
-          await writeLog(`lighthouse-${slugify(url)}-${j+1}-of-${numberOfRuns}.json`, rawResult, opts.logDirectory);
+          if(opts.writeLogs) {
+            await writeLog(filename, rawResult, opts.logDirectory);
+          }
         }
+
+        resultLog.add(url, rawResult);
       } catch(e) {
         console.log( `Logged an error with ${url}: `, e );
         resultLog.addError(url, e);
       }
     }
 
-    // Note that this needs to kill between runs for a fresh chrome profile
-    // We don’t want the second run to be a repeat full-cache serviceworker view
-    await chrome.kill();
+    if(chrome) {
+      // Note that this needs to kill between runs for a fresh chrome profile
+      // We don’t want the second run to be a repeat full-cache serviceworker view
+      await chrome.kill();
+    }
   }
 
   return await resultLog.getFinalSortedResults();

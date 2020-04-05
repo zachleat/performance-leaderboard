@@ -37,7 +37,7 @@ class ResultLogger {
     }
 
     if(b.accessibilityScore === a.accessibilityScore) {
-      if( b.axe.violtions === a.axe.violations ) {
+      if( b.axe.violations === a.axe.violations ) {
         // higher is better
         // TODO if this is equal, sort by performance?
         return b.axe.passes - a.axe.passes;
@@ -96,8 +96,8 @@ class ResultLogger {
       firstContentfulPaint: result.audits['first-contentful-paint'].numericValue,
       firstMeaningfulPaint: result.audits['first-meaningful-paint'].numericValue,
       speedIndex: result.audits['speed-index'].numericValue,
-      totalWeight: result.audits.diagnostics.details.items[0].totalByteWeight,
       diagnostics: result.audits.diagnostics.details.items[0],
+      // totalWeight: result.audits.diagnostics.details.items[0].totalByteWeight,
       // TODO size of HTML, JS, CSS, Web Fonts
       // weights: {
       //   mainDocument: result.audits.diagnostics.details.items[0].mainDocumentTransferSize

@@ -34,6 +34,7 @@ class AxeTester {
     if(this.writeLogs) {
       await writeLog(`axe-${slugify(url)}.json`, results, this.logDirectory);
     }
+    console.log( `Finished full axe scan for ${url}` );
     return {
       passes: results.passes.length,
       violations: results.violations.length
