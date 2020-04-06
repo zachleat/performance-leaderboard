@@ -108,12 +108,6 @@ class ResultLogger {
   }
 
   mapResult(result) {
-    if(result.requestedUrl.startsWith("https://github.com/")) {
-      return {
-        url: result.requestedUrl
-      };
-    }
-
     return {
       url: result.requestedUrl,
       finalUrl: result.finalUrl,
