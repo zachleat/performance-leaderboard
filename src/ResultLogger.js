@@ -5,6 +5,14 @@ class ResultLogger {
     this.results = {};
   }
 
+  set readFromLogs(doRead) {
+    this._readFromLogs = doRead;
+  }
+
+  get readFromLogs() {
+    return this._readFromLogs;
+  }
+
   set writeLogs(doWrite) {
     this._writeLogs = doWrite;
   }
@@ -21,22 +29,39 @@ class ResultLogger {
     return this._logDir;
   }
 
-  _getErrorSort(a, b) {
-    if(b.error && a.error) {
+  _getGoodKeyCheckSort(a, b, key) {
+    if(b[key] && a[key]) {
       return 0;
-    } else if(b.error) {
+    } else if(a[key]) {
       return -1;
-    } else if(a.error) {
+    } else if(b[key]) {
+      return 1;
+    }
+  }
+  _getBadKeyCheckSort(a, b, key) {
+    if(b[key] && a[key]) {
+      return 0;
+    } else if(b[key]) {
+      return -1;
+    } else if(a[key]) {
       return 1;
     }
   }
 
   sortByAccessibility(a, b) {
     if(a.error || b.error) {
-      return this._getErrorSort(a, b);
+      return this._getBadKeyCheckSort(a, b, "error");
     }
 
     if(b.accessibilityScore === a.accessibilityScore) {
+      if(!a.axe || !b.axe) {
+        return this._getGoodKeyCheckSort(a, b, "axe");
+      }
+
+      if(a.axe.error || b.axe.error) {
+        return this._getBadKeyCheckSort(a.axe, b.axe, "error");
+      }
+
       if( b.axe.violations === a.axe.violations ) {
         // higher is better
         // TODO if this is equal, sort by performance?
@@ -46,12 +71,13 @@ class ResultLogger {
       // lower is better
       return a.axe.violations - b.axe.violations;
     }
+
     return b.accessibilityScore - a.accessibilityScore;
   }
 
   sortByPerformance(a, b) {
     if(a.error || b.error) {
-      return this._getErrorSort(a, b);
+      return this._getBadKeyCheckSort(a, b, "error");
     }
 
     if(b.lighthouseScore === a.lighthouseScore) {
@@ -132,13 +158,19 @@ class ResultLogger {
     let axeTester = new AxeTester();
     axeTester.logDirectory = this.logDirectory;
     axeTester.writeLogs = this.writeLogs;
+    axeTester.readFromLogs = this.readFromLogs;
 
     await axeTester.start();
 
+    let count = 0;
     let sortByA11yFn = this.sortByAccessibility.bind(this);
+    let size = Object.keys(this.results).length;
     for(let url in this.results) {
       let result = this.getMedianResultForUrl(url, sortByA11yFn);
-      result.axe = await axeTester.fetchResults(url);
+
+      console.log( `Axe scan (${++count} of ${size}) for ${url}` );
+
+      result.axe = await axeTester.getResults(url);
       a11yResults.push(result);
     }
 
@@ -150,6 +182,7 @@ class ResultLogger {
           if(perfResult.url === entry.url) {
             entry.accessibilityRank = index + 1;
             perfResult.accessibilityRank = index + 1;
+            perfResult.axe = entry.axe;
             return;
           }
         }

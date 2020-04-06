@@ -8,7 +8,6 @@ const readLog = require("./src/ReadLog");
 const NUMBER_OF_RUNS = 3;
 const LOG_DIRECTORY = ".log";
 
-
 async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) {
   let opts = Object.assign({
     writeLogs: true,
@@ -22,6 +21,7 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
   let resultLog = new ResultLogger();
   resultLog.logDirectory = opts.logDirectory;
   resultLog.writeLogs = opts.writeLogs;
+  resultLog.readFromLogs = opts.readFromLogDirectory;
 
   console.log( `Testing ${urls.length} sites:` );
 
