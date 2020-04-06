@@ -48,6 +48,14 @@ class ResultLogger {
     }
   }
 
+  sortByAccessibilityBeforeAxe(a, b) {
+    if(a.error || b.error) {
+      return this._getBadKeyCheckSort(a, b, "error");
+    }
+
+    return b.accessibilityScore - a.accessibilityScore;
+  }
+
   sortByAccessibility(a, b) {
     if(a.error || b.error) {
       return this._getBadKeyCheckSort(a, b, "error");
@@ -157,20 +165,18 @@ class ResultLogger {
     await axeTester.start();
 
     let count = 0;
-    let sortByA11yFn = this.sortByAccessibility.bind(this);
     let size = Object.keys(this.results).length;
     for(let url in this.results) {
-      let result = this.getMedianResultForUrl(url, sortByA11yFn);
+      let result = this.getMedianResultForUrl(url, this.sortByAccessibilityBeforeAxe.bind(this));
 
       console.log( `Axe scan (${++count} of ${size}) for ${url}` );
-
       result.axe = await axeTester.getResults(url);
       a11yResults.push(result);
     }
 
     await axeTester.finish();
 
-    a11yResults.sort(sortByA11yFn).forEach((entry, index) => {
+    a11yResults.sort(this.sortByAccessibility.bind(this)).forEach((entry, index) => {
       if(entry) {
         for(let perfResult of perfResults) {
           if(perfResult.url === entry.url) {
