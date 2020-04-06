@@ -53,7 +53,8 @@ class ResultLogger {
       return this._getBadKeyCheckSort(a, b, "error");
     }
 
-    return b.accessibilityScore - a.accessibilityScore;
+    // We want the lowest score here
+    return a.accessibilityScore - b.accessibilityScore;
   }
 
   sortByAccessibility(a, b) {
@@ -141,6 +142,12 @@ class ResultLogger {
     }
   }
 
+  getLowestResultForUrl(url, sortFn) {
+    if(this.results[url] && this.results[url].length) {
+      return this.results[url].filter(() => true).sort(sortFn)[0];
+    }
+  }
+
   async getFinalSortedResults() {
     let perfResults = [];
     let sortByPerfFn = this.sortByPerformance.bind(this);
@@ -167,7 +174,7 @@ class ResultLogger {
     let count = 0;
     let size = Object.keys(this.results).length;
     for(let url in this.results) {
-      let result = this.getMedianResultForUrl(url, this.sortByAccessibilityBeforeAxe.bind(this));
+      let result = this.getLowestResultForUrl(url, this.sortByAccessibilityBeforeAxe.bind(this));
 
       console.log( `Axe scan (${++count} of ${size}) for ${url}` );
       result.axe = await axeTester.getResults(url);
@@ -176,18 +183,21 @@ class ResultLogger {
 
     await axeTester.finish();
 
-    a11yResults.sort(this.sortByAccessibility.bind(this)).forEach((entry, index) => {
-      if(entry) {
-        for(let perfResult of perfResults) {
-          if(perfResult.url === entry.url) {
-            entry.accessibilityRank = index + 1;
-            perfResult.accessibilityRank = index + 1;
-            perfResult.axe = entry.axe;
-            return;
-          }
+    a11yResults.sort(this.sortByAccessibility.bind(this));
+
+    let a11yRank = 1;
+    for(let a11yResult of a11yResults) {
+      for(let perfResult of perfResults) {
+        if(perfResult.url === a11yResult.url) {
+          // overwrite the original Accessibility Score
+          // as the lowest a11y result of X runs may be different than the median performance result from X runs
+          perfResult.accessibilityScore = a11yResult.accessibilityScore;
+          perfResult.accessibilityRank = a11yRank;
+          perfResult.axe = a11yResult.axe;
         }
       }
-    });
+      a11yRank++;
+    }
 
     return perfResults;
   }
