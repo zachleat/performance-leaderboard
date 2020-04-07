@@ -38,10 +38,22 @@ class AxeTester {
     return `axe-${slugify(url)}.json`;
   }
 
+  count(rawResults, key) {
+    let count = 0;
+    for(let entry of rawResults[key]) {
+      if(entry.nodes.length) {
+        count += entry.nodes.length;
+      } else {
+        count++;
+      }
+    }
+    return count;
+  }
+
   cleanResults(rawResults) {
     return {
-      passes: rawResults.passes.length,
-      violations: rawResults.violations.length
+      passes: this.count(rawResults, "passes"),
+      violations: this.count(rawResults, "violations")
     }
   }
 
@@ -56,6 +68,7 @@ class AxeTester {
     await this.page.goto(url, {
       waitUntil: ["load", "networkidle0"]
     });
+
     const results = await new AxePuppeteer(this.page).analyze();
     if(this.writeLogs) {
       await writeLog(this.getLogFilename(url), results, this.logDirectory);
@@ -70,7 +83,7 @@ class AxeTester {
       if(this.readFromLogs) {
         return this.getLogResults(url);
       } else {
-        return await fetchNewResults(url);
+        return await this.fetchNewResults(url);
       }
     } catch(e) {
       console.log( `Axe error with ${url}`, e );
