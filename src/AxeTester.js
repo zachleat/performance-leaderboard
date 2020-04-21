@@ -59,6 +59,9 @@ class AxeTester {
 
   getLogResults(url) {
     let rawResults = readLog(this.getLogFilename(url), this.logDirectory);
+    if(rawResults === false) {
+      return false;
+    }
     return this.cleanResults(rawResults);
   }
 
@@ -80,8 +83,9 @@ class AxeTester {
 
   async getResults(url) {
     try {
-      if(this.readFromLogs) {
-        return this.getLogResults(url);
+      let readResult = this.getLogResults(url);
+      if(this.readFromLogs && readResult !== false) {
+        return readResult;
       } else {
         return await this.fetchNewResults(url);
       }

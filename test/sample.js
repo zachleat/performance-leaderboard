@@ -16,5 +16,5 @@ const PerfLeaderboard = require("../.");
 		// "https://redwoodjs.com/"
 	];
 
-	console.log( await PerfLeaderboard(urls, 1) );
+	console.log( await PerfLeaderboard(urls, 5) );
 })();
