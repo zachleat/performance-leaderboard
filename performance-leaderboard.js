@@ -23,7 +23,7 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
   resultLog.writeLogs = opts.writeLogs;
   resultLog.readFromLogs = opts.readFromLogDirectory;
 
-  console.log( `Testing ${urls.length} sites:` );
+  console.log( `Testing ${urls.length} site${urls.length !== 1 ? "s" : ""}:` );
 
   // SpeedIndex was much lower on repeat runs if we don’t
   // kill the chrome instance between runs of the same site
