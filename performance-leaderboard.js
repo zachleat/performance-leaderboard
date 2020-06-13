@@ -13,8 +13,9 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
     writeLogs: true,
     logDirectory: LOG_DIRECTORY,
     readFromLogDirectory: false,
-    onlyCategories: ["performance", "accessibility"],
-    chromeFlags: ['--headless']
+    // onlyCategories: ["performance", "accessibility"],
+    chromeFlags: ['--headless'],
+    freshChrome: "site", // or "run"
   }, options);
   let config = null;
 
@@ -30,12 +31,21 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
   for(let j = 0; j < numberOfRuns; j++) {
     let count = 0;
     let chrome;
-    if(!opts.readFromLogDirectory) {
-      chrome = await chromeLauncher.launch({chromeFlags: opts.chromeFlags});
+    if(!opts.readFromLogDirectory && options.freshChrome === "run") {
+      chrome = await chromeLauncher.launch({
+        chromeFlags: opts.chromeFlags
+      });
       opts.port = chrome.port;
     }
 
     for(let url of urls) {
+      if(!opts.readFromLogDirectory && options.freshChrome === "site") {
+        chrome = await chromeLauncher.launch({
+          chromeFlags: opts.chromeFlags
+        });
+        opts.port = chrome.port;
+      }
+
       console.log( `(Site ${++count} of ${urls.length}, run ${j+1} of ${numberOfRuns}): ${url}` );
       try {
         let filename = `lighthouse-${slugify(url)}-${j+1}-of-${numberOfRuns}.json`;
@@ -55,9 +65,13 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
         console.log( `Logged an error with ${url}: `, e );
         resultLog.addError(url, e);
       }
+
+      if(chrome && options.freshChrome === "site") {
+        await chrome.kill();
+      }
     }
 
-    if(chrome) {
+    if(chrome && options.freshChrome === "run") {
       // Note that this needs to kill between runs for a fresh chrome profile
       // We don’t want the second run to be a repeat full-cache serviceworker view
       await chrome.kill();

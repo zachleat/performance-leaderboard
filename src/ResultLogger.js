@@ -54,7 +54,7 @@ class ResultLogger {
     }
 
     // We want the lowest score here
-    return a.accessibilityScore - b.accessibilityScore;
+    return a.lighthouse.accessibility - b.lighthouse.accessibility;
   }
 
   sortByAccessibility(a, b) {
@@ -62,7 +62,7 @@ class ResultLogger {
       return this._getBadKeyCheckSort(a, b, "error");
     }
 
-    if(b.accessibilityScore === a.accessibilityScore) {
+    if(b.lighthouse.accessibility === a.lighthouse.accessibility) {
       if(!a.axe || !b.axe) {
         return this._getGoodKeyCheckSort(a, b, "axe");
       }
@@ -81,7 +81,7 @@ class ResultLogger {
       return a.axe.violations - b.axe.violations;
     }
 
-    return b.accessibilityScore - a.accessibilityScore;
+    return b.lighthouse.accessibility - a.lighthouse.accessibility;
   }
 
   sortByPerformance(a, b) {
@@ -89,12 +89,12 @@ class ResultLogger {
       return this._getBadKeyCheckSort(a, b, "error");
     }
 
-    if(b.lighthouseScore === a.lighthouseScore) {
+    if(b.lighthouse.performance === a.lighthouse.performance) {
       // lower speed index scores are better
       return a.speedIndex - b.speedIndex;
     }
     // higher lighthouse scores are better
-    return b.lighthouseScore - a.lighthouseScore;
+    return b.lighthouse.performance - a.lighthouse.performance;
   }
 
   _add(url, result) {
@@ -118,19 +118,37 @@ class ResultLogger {
 
   mapResult(result) {
     return {
-      url: result.requestedUrl,
-      finalUrl: result.finalUrl,
-      lighthouseScore: result.categories.performance.score,
-      accessibilityScore: result.categories.accessibility.score,
+      url: result.finalUrl,
+      requestedUrl: result.requestedUrl,
+      timestamp: Date.now(),
+      ranks: {},
+      lighthouse: {
+        performance: result.categories.performance.score,
+        accessibility: result.categories.accessibility.score,
+        bestPractices: result.categories['best-practices'].score,
+        seo: result.categories['seo'].score,
+      },
       firstContentfulPaint: result.audits['first-contentful-paint'].numericValue,
-      firstMeaningfulPaint: result.audits['first-meaningful-paint'].numericValue,
       speedIndex: result.audits['speed-index'].numericValue,
-      diagnostics: result.audits.diagnostics.details.items[0],
-      // totalWeight: result.audits.diagnostics.details.items[0].totalByteWeight,
-      // TODO size of HTML, JS, CSS, Web Fonts
-      // weights: {
-      //   mainDocument: result.audits.diagnostics.details.items[0].mainDocumentTransferSize
-      // }
+      largestContentfulPaint: result.audits['largest-contentful-paint'].numericValue,
+      totalBlockingTime: result.audits['total-blocking-time'].numericValue,
+      cumulativeLayoutShift: result.audits['cumulative-layout-shift'].numericValue,
+      timeToInteractive: result.audits['interactive'].numericValue,
+      maxPotentialFirstInputDelay: result.audits['max-potential-fid'].numericValue,
+      timeToFirstByte: result.audits['server-response-time'].numericValue,
+      weight: {
+        summary: result.audits['resource-summary'].displayValue,
+        total: result.audits.diagnostics.details.items[0].totalByteWeight,
+        image: result.audits['resource-summary'].details.items.filter(entry => entry.resourceType === 'image')[0].transferSize,
+        imageCount: result.audits['resource-summary'].details.items.filter(entry => entry.resourceType === 'image')[0].requestCount,
+        script: result.audits['resource-summary'].details.items.filter(entry => entry.resourceType === 'script')[0].transferSize,
+        scriptCount: result.audits['resource-summary'].details.items.filter(entry => entry.resourceType === 'script')[0].requestCount,
+        document: result.audits['resource-summary'].details.items.filter(entry => entry.resourceType === 'document')[0].transferSize,
+        font: result.audits['resource-summary'].details.items.filter(entry => entry.resourceType === 'font')[0].transferSize,
+        fontCount: result.audits['resource-summary'].details.items.filter(entry => entry.resourceType === 'font')[0].requestCount,
+        thirdParty: result.audits['resource-summary'].details.items.filter(entry => entry.resourceType === 'third-party')[0].transferSize,
+        thirdPartyCount: result.audits['resource-summary'].details.items.filter(entry => entry.resourceType === 'third-party')[0].requestCount,
+      },
     };
   }
 
@@ -156,8 +174,7 @@ class ResultLogger {
     }
     perfResults.sort(sortByPerfFn).map((entry, index) => {
       if(entry) {
-        entry.rank = index + 1;
-        entry.performanceRank = index + 1;
+        entry.ranks.performance = index + 1;
       }
       return entry;
     });
@@ -191,8 +208,8 @@ class ResultLogger {
         if(perfResult.url === a11yResult.url) {
           // overwrite the original Accessibility Score
           // as the lowest a11y result of X runs may be different than the median performance result from X runs
-          perfResult.accessibilityScore = a11yResult.accessibilityScore;
-          perfResult.accessibilityRank = a11yRank;
+          perfResult.lighthouse.accessibility = a11yResult.lighthouse.accessibility;
+          perfResult.ranks.accessibility = a11yRank;
           perfResult.axe = a11yResult.axe;
         }
       }
