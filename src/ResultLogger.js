@@ -97,6 +97,25 @@ class ResultLogger {
     return b.lighthouse.performance - a.lighthouse.performance;
   }
 
+  sortByTotalHundos(a, b) {
+    if(a.error || b.error) {
+      return this._getBadKeyCheckSort(a, b, "error");
+    }
+
+    let bSum = b.lighthouse.performance + b.lighthouse.accessibility + b.lighthouse.seo + b.lighthouse.bestPractices;
+    let aSum = a.lighthouse.performance + a.lighthouse.accessibility + a.lighthouse.seo + a.lighthouse.bestPractices;
+    if(bSum === aSum) {
+      // speed index per KB
+      // lower is better
+
+      // low speed index with high weight is more impressive 😇
+      return a.speedIndex / a.weight.total - b.speedIndex / b.weight.total;
+    }
+
+    // higher is better
+    return bSum - aSum;
+  }
+
   _add(url, result) {
     if(!this.results[url]) {
       this.results[url] = [];
@@ -172,12 +191,22 @@ class ResultLogger {
     for(let url in this.results) {
       perfResults.push(this.getMedianResultForUrl(url, sortByPerfFn));
     }
+
+    let sortByHundosFn = this.sortByTotalHundos.bind(this);
+    perfResults.sort(sortByHundosFn).map((entry, index) => {
+      if(entry) {
+        entry.ranks.hundos = index + 1;
+      }
+      return entry;
+    });
+
     perfResults.sort(sortByPerfFn).map((entry, index) => {
       if(entry) {
         entry.ranks.performance = index + 1;
       }
       return entry;
     });
+
 
     // Insert accessibilityRank into perfResults
     let a11yResults = [];
