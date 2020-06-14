@@ -4,6 +4,7 @@ const chromeLauncher = require("chrome-launcher");
 const ResultLogger = require("./src/ResultLogger");
 const writeLog = require("./src/WriteLog");
 const readLog = require("./src/ReadLog");
+const chromePath = require("puppeteer").executablePath()
 
 const NUMBER_OF_RUNS = 3;
 const LOG_DIRECTORY = ".log";
@@ -16,6 +17,7 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
     // onlyCategories: ["performance", "accessibility"],
     chromeFlags: ['--headless'],
     freshChrome: "site", // or "run"
+    launchOptions: {},
   }, options);
   let config = null;
 
@@ -32,17 +34,21 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
     let count = 0;
     let chrome;
     if(!opts.readFromLogDirectory && options.freshChrome === "run") {
-      chrome = await chromeLauncher.launch({
-        chromeFlags: opts.chromeFlags
-      });
+      chrome = await chromeLauncher.launch(Object.assign({
+        chromeFlags: opts.chromeFlags,
+        // reuse puppeteer chrome path
+        chromePath: chromePath,
+      }, opts.launchOptions));
       opts.port = chrome.port;
     }
 
     for(let url of urls) {
       if(!opts.readFromLogDirectory && options.freshChrome === "site") {
-        chrome = await chromeLauncher.launch({
-          chromeFlags: opts.chromeFlags
-        });
+        chrome = await chromeLauncher.launch(Object.assign({
+          chromeFlags: opts.chromeFlags,
+          // reuse puppeteer chrome path
+          chromePath: chromePath,
+        }, opts.launchOptions));
         opts.port = chrome.port;
       }
 
