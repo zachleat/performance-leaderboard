@@ -142,6 +142,7 @@ class ResultLogger {
       timestamp: Date.now(),
       ranks: {},
       lighthouse: {
+        version: result.lighthouseVersion,
         performance: result.categories.performance.score,
         accessibility: result.categories.accessibility.score,
         bestPractices: result.categories['best-practices'].score,
