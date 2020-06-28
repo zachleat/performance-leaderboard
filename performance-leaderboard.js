@@ -33,7 +33,8 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
   for(let j = 0; j < numberOfRuns; j++) {
     let count = 0;
     let chrome;
-    if(!opts.readFromLogDirectory && options.freshChrome === "run") {
+
+    if(!opts.readFromLogDirectory && opts.freshChrome === "run") {
       chrome = await chromeLauncher.launch(Object.assign({
         chromeFlags: opts.chromeFlags,
         // reuse puppeteer chrome path
@@ -41,9 +42,8 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
       }, opts.launchOptions));
       opts.port = chrome.port;
     }
-
     for(let url of urls) {
-      if(!opts.readFromLogDirectory && options.freshChrome === "site") {
+      if(!opts.readFromLogDirectory && opts.freshChrome === "site") {
         chrome = await chromeLauncher.launch(Object.assign({
           chromeFlags: opts.chromeFlags,
           // reuse puppeteer chrome path
@@ -72,12 +72,12 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
         resultLog.addError(url, e);
       }
 
-      if(chrome && options.freshChrome === "site") {
+      if(chrome && opts.freshChrome === "site") {
         await chrome.kill();
       }
     }
 
-    if(chrome && options.freshChrome === "run") {
+    if(chrome && opts.freshChrome === "run") {
       // Note that this needs to kill between runs for a fresh chrome profile
       // We don’t want the second run to be a repeat full-cache serviceworker view
       await chrome.kill();
