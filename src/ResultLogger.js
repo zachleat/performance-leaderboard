@@ -166,6 +166,8 @@ class ResultLogger {
         document: result.audits['resource-summary'].details.items.filter(entry => entry.resourceType === 'document')[0].transferSize,
         font: result.audits['resource-summary'].details.items.filter(entry => entry.resourceType === 'font')[0].transferSize,
         fontCount: result.audits['resource-summary'].details.items.filter(entry => entry.resourceType === 'font')[0].requestCount,
+        stylesheet: result.audits['resource-summary'].details.items.filter(entry => entry.resourceType === 'stylesheet')[0].transferSize,
+        stylesheetCount: result.audits['resource-summary'].details.items.filter(entry => entry.resourceType === 'stylesheet')[0].requestCount,
         thirdParty: result.audits['resource-summary'].details.items.filter(entry => entry.resourceType === 'third-party')[0].transferSize,
         thirdPartyCount: result.audits['resource-summary'].details.items.filter(entry => entry.resourceType === 'third-party')[0].requestCount,
       },
