@@ -1,4 +1,5 @@
 const AxeTester = require("./AxeTester");
+const LighthouseMedianRun = require("../lib/lh-median-run.js");
 
 class ResultLogger {
   constructor() {
@@ -146,7 +147,11 @@ class ResultLogger {
         performance: result.categories.performance.score,
         accessibility: result.categories.accessibility.score,
         bestPractices: result.categories['best-practices'].score,
-        seo: result.categories['seo'].score,
+        seo: result.categories.seo.score,
+        total: result.categories.performance.score * 100 +
+          result.categories.accessibility.score * 100 +
+          result.categories['best-practices'].score * 100 +
+          result.categories.seo.score * 100
       },
       firstContentfulPaint: result.audits['first-contentful-paint'].numericValue,
       speedIndex: result.audits['speed-index'].numericValue,
@@ -174,11 +179,9 @@ class ResultLogger {
     };
   }
 
-  getMedianResultForUrl(url, sortFn) {
+  getMedianResultForUrl(url) {
     if(this.results[url] && this.results[url].length) {
-      // Log all runs
-      // console.log( this.results[url] );
-      return this.results[url].filter(() => true).sort(sortFn)[Math.floor(this.results[url].length / 2)];
+      return LighthouseMedianRun.computeMedianRun(this.results[url].filter(entry => entry && !entry.error));
     }
   }
 
@@ -190,9 +193,8 @@ class ResultLogger {
 
   async getFinalSortedResults() {
     let perfResults = [];
-    let sortByPerfFn = this.sortByPerformance.bind(this);
     for(let url in this.results) {
-      perfResults.push(this.getMedianResultForUrl(url, sortByPerfFn));
+      perfResults.push(this.getMedianResultForUrl(url));
     }
 
     let sortByHundosFn = this.sortByTotalHundos.bind(this);
@@ -203,6 +205,7 @@ class ResultLogger {
       return entry;
     });
 
+    let sortByPerfFn = this.sortByPerformance.bind(this);
     perfResults.sort(sortByPerfFn).map((entry, index) => {
       if(entry) {
         entry.ranks.performance = index + 1;
