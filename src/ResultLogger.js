@@ -181,7 +181,13 @@ class ResultLogger {
 
   getMedianResultForUrl(url) {
     if(this.results[url] && this.results[url].length) {
-      return LighthouseMedianRun.computeMedianRun(this.results[url].filter(entry => entry && !entry.error));
+      let goodResults = this.results[url].filter(entry => entry && !entry.error);
+      if(!goodResults.length) {
+        // if they’re all errors just return the first
+        return this.results[url][0];
+      }
+
+      return LighthouseMedianRun.computeMedianRun(goodResults);
     }
   }
 
