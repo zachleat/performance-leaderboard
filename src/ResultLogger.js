@@ -117,6 +117,26 @@ class ResultLogger {
     return bSum - aSum;
   }
 
+  sortByCumulativeScore(a, b) {
+    if(a.error || b.error) {
+      return this._getBadKeyCheckSort(a, b, "error");
+    }
+
+    let bSum = b.lighthouse.performance + b.lighthouse.accessibility + b.lighthouse.seo + b.lighthouse.bestPractices - b.axe.violations;
+    let aSum = a.lighthouse.performance + a.lighthouse.accessibility + a.lighthouse.seo + a.lighthouse.bestPractices - a.axe.violations;
+    if(bSum === aSum) {
+      // speed index per KB
+      // lower is better
+
+      // low speed index with high weight is more impressive 😇
+      return a.speedIndex / a.weight.total - b.speedIndex / b.weight.total;
+    }
+
+    // higher is better
+    return bSum - aSum;
+  }
+
+
   _add(url, result) {
     if(!this.results[url]) {
       this.results[url] = [];
@@ -219,7 +239,6 @@ class ResultLogger {
       return entry;
     });
 
-
     // Insert accessibilityRank into perfResults
     let a11yResults = [];
     let axeTester = new AxeTester();
@@ -256,6 +275,15 @@ class ResultLogger {
       }
       a11yRank++;
     }
+
+    // Cumulative Score (must run after axe scores)
+    let sortByCumulativeFn = this.sortByCumulativeScore.bind(this);
+    perfResults.sort(sortByCumulativeFn).map((entry, index) => {
+      if(entry) {
+        entry.ranks.cumulative = index + 1;
+      }
+      return entry;
+    });
 
     return perfResults;
   }

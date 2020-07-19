@@ -40,7 +40,3 @@ const PerfLeaderboard = require("performance-leaderboard");
 ```
 
 2. Run `node sample.js`.
-
-## Experiments
-
-* Maybe switch to use [Puppeteer for headless testing](https://github.com/GoogleChrome/lighthouse/blob/master/docs/puppeteer.md) instead of `chrome-launcher`
