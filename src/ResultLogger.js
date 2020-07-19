@@ -122,9 +122,14 @@ class ResultLogger {
       return this._getBadKeyCheckSort(a, b, "error");
     }
 
-    let bSum = b.lighthouse.performance + b.lighthouse.accessibility + b.lighthouse.seo + b.lighthouse.bestPractices - b.axe.violations;
-    let aSum = a.lighthouse.performance + a.lighthouse.accessibility + a.lighthouse.seo + a.lighthouse.bestPractices - a.axe.violations;
+    let bSum = b.lighthouse.performance + b.lighthouse.accessibility + b.lighthouse.seo + b.lighthouse.bestPractices;
+    let aSum = a.lighthouse.performance + a.lighthouse.accessibility + a.lighthouse.seo + a.lighthouse.bestPractices;
     if(bSum === aSum) {
+      if(a.axe.violations !== b.axe.violations) {
+        // lower violations are better
+        return a.axe.violations - b.axe.violations;
+      }
+
       // speed index per KB
       // lower is better
 
