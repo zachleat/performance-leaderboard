@@ -161,7 +161,28 @@ class ResultLogger {
     });
   }
 
+  _getResultResourceSummaryItem(result, resourceType, prop) {
+    let details = result.audits['resource-summary'].details;
+    if(details) {
+      let items = details.items;
+      if(items && items.length) {
+        return items.filter(entry => entry.resourceType === resourceType)[0][prop];
+      }
+    }
+  }
+
   mapResult(result) {
+    // Bad certificate, maybe
+    if(result.categories.performance.score === null &&
+      result.categories.accessibility.score === null &&
+      result.categories['best-practices'].score === null && 
+      result.categories.seo.score === null) {
+      return {
+        url: result.finalUrl,
+        error: "Unknown error."
+      };
+    }
+
     return {
       url: result.finalUrl,
       requestedUrl: result.requestedUrl,
@@ -188,18 +209,18 @@ class ResultLogger {
       timeToFirstByte: result.audits['server-response-time'].numericValue,
       weight: {
         summary: result.audits['resource-summary'].displayValue,
-        total: result.audits.diagnostics.details.items[0].totalByteWeight,
-        image: result.audits['resource-summary'].details.items.filter(entry => entry.resourceType === 'image')[0].transferSize,
-        imageCount: result.audits['resource-summary'].details.items.filter(entry => entry.resourceType === 'image')[0].requestCount,
-        script: result.audits['resource-summary'].details.items.filter(entry => entry.resourceType === 'script')[0].transferSize,
-        scriptCount: result.audits['resource-summary'].details.items.filter(entry => entry.resourceType === 'script')[0].requestCount,
-        document: result.audits['resource-summary'].details.items.filter(entry => entry.resourceType === 'document')[0].transferSize,
-        font: result.audits['resource-summary'].details.items.filter(entry => entry.resourceType === 'font')[0].transferSize,
-        fontCount: result.audits['resource-summary'].details.items.filter(entry => entry.resourceType === 'font')[0].requestCount,
-        stylesheet: result.audits['resource-summary'].details.items.filter(entry => entry.resourceType === 'stylesheet')[0].transferSize,
-        stylesheetCount: result.audits['resource-summary'].details.items.filter(entry => entry.resourceType === 'stylesheet')[0].requestCount,
-        thirdParty: result.audits['resource-summary'].details.items.filter(entry => entry.resourceType === 'third-party')[0].transferSize,
-        thirdPartyCount: result.audits['resource-summary'].details.items.filter(entry => entry.resourceType === 'third-party')[0].requestCount,
+        total: result.audits['total-byte-weight'].numericValue,
+        image: this._getResultResourceSummaryItem(result, "image", "transferSize"),
+        imageCount: this._getResultResourceSummaryItem(result, "image", "requestCount"),
+        script: this._getResultResourceSummaryItem(result, "script", "transferSize"),
+        scriptCount: this._getResultResourceSummaryItem(result, "script", "requestCount"),
+        document: this._getResultResourceSummaryItem(result, "document", "transferSize"),
+        font: this._getResultResourceSummaryItem(result, "font", "transferSize"),
+        fontCount: this._getResultResourceSummaryItem(result, "font", "requestCount"),
+        stylesheet: this._getResultResourceSummaryItem(result, "stylesheet", "transferSize"),
+        stylesheetCount: this._getResultResourceSummaryItem(result, "stylesheet", "requestCount"),
+        thirdParty: this._getResultResourceSummaryItem(result, "third-party", "transferSize"),
+        thirdPartyCount: this._getResultResourceSummaryItem(result, "third-party", "requestCount"),
       },
     };
   }
@@ -218,19 +239,26 @@ class ResultLogger {
 
   getLowestResultForUrl(url, sortFn) {
     if(this.results[url] && this.results[url].length) {
-      return this.results[url].filter(() => true).sort(sortFn)[0];
+      let results = this.results[url].filter(entry => entry && !entry.error).sort(sortFn);
+      return results.length ? results[0] : null;
     }
   }
 
   async getFinalSortedResults() {
     let perfResults = [];
+    // let errorResults = [];
     for(let url in this.results) {
-      perfResults.push(this.getMedianResultForUrl(url));
+      let result = this.getMedianResultForUrl(url);
+      // if(result.error) {
+        // errorResults.push(result);
+      // } else {
+        perfResults.push(result);
+      // }
     }
 
     let sortByHundosFn = this.sortByTotalHundos.bind(this);
     perfResults.sort(sortByHundosFn).map((entry, index) => {
-      if(entry) {
+      if(entry && entry.ranks) {
         entry.ranks.hundos = index + 1;
       }
       return entry;
@@ -238,7 +266,7 @@ class ResultLogger {
 
     let sortByPerfFn = this.sortByPerformance.bind(this);
     perfResults.sort(sortByPerfFn).map((entry, index) => {
-      if(entry) {
+      if(entry && entry.ranks) {
         entry.ranks.performance = index + 1;
       }
       return entry;
@@ -258,9 +286,11 @@ class ResultLogger {
     for(let url in this.results) {
       let result = this.getLowestResultForUrl(url, this.sortByAccessibilityBeforeAxe.bind(this));
 
-      console.log( `Axe scan (${++count} of ${size}) for ${url}` );
-      result.axe = await axeTester.getResults(url);
-      a11yResults.push(result);
+      if(result) {
+        console.log( `Axe scan (${++count} of ${size}) for ${url}` );
+        result.axe = await axeTester.getResults(url);
+        a11yResults.push(result);
+      }
     }
 
     await axeTester.finish();
@@ -284,7 +314,7 @@ class ResultLogger {
     // Cumulative Score (must run after axe scores)
     let sortByCumulativeFn = this.sortByCumulativeScore.bind(this);
     perfResults.sort(sortByCumulativeFn).map((entry, index) => {
-      if(entry) {
+      if(entry && entry.ranks) {
         entry.ranks.cumulative = index + 1;
       }
       return entry;
