@@ -32,9 +32,10 @@ const PerfLeaderboard = require("performance-leaderboard");
 		"https://gohugo.io/",
 	];
 
+	// Run each site 3 times
 	console.log( await PerfLeaderboard(urls) );
 
-	// Run each site 5 times (default is 3)
+	// Or run each site 5 times
 	console.log( await PerfLeaderboard(urls, 5) );
 })();
 ```
@@ -91,7 +92,7 @@ In the return object you’ll see a `ranks` object listing how this site compare
 * `ranks.accessibility`
 	* The highest Lighthouse accessibility score.
 	* Tiebreaker given to lower Axe violations.
-	* Second tiebreaker given to highest Axe passes (warning: repeats are treated separately so this will prefer larger pages)
+	* Second tiebreaker given to highest Axe passes (warning: each instance of an Axe rule passing is treated separately so this will weigh heavily in favor of larger pages)
 * `ranks.hundos`
 	* The sum of all four Lighthouse scores.
 	* Tiebreaker given to the lower Speed Index / Total Page Weight ratio.
