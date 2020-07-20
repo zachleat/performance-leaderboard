@@ -233,7 +233,7 @@ class ResultLogger {
         return this.results[url][0];
       }
 
-      return LighthouseMedianRun.computeMedianRun(goodResults);
+      return LighthouseMedianRun.computeMedianRun(goodResults, url);
     }
   }
 
