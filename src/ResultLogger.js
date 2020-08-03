@@ -227,7 +227,7 @@ class ResultLogger {
 
   getMedianResultForUrl(url) {
     if(this.results[url] && this.results[url].length) {
-      let goodResults = this.results[url].filter(entry => entry && !entry.error);
+      let goodResults = this.results[url].filter(entry => entry && !entry.error && entry.lighthouse.performance !== null);
       if(!goodResults.length) {
         // if they’re all errors just return the first
         return this.results[url][0];
