@@ -56,6 +56,7 @@ const PerfLeaderboard = require("performance-leaderboard");
        accessibility: 1,
        bestPractices: 1,
        seo: 1,
+       carbon: 1,
        total: 400 },
     firstContentfulPaint: 1222.9119999999998,
     speedIndex: 1345.9715418833482,
