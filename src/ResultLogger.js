@@ -194,6 +194,7 @@ class ResultLogger {
         accessibility: result.categories.accessibility.score,
         bestPractices: result.categories['best-practices'].score,
         seo: result.categories.seo.score,
+        carbon: (result.weight.total / 1024 / 1024 / 1024) * 0.06 * 1000,
         total: result.categories.performance.score * 100 +
           result.categories.accessibility.score * 100 +
           result.categories['best-practices'].score * 100 +
