@@ -125,6 +125,10 @@ class ResultLogger {
     let bSum = b.lighthouse.performance + b.lighthouse.accessibility + b.lighthouse.seo + b.lighthouse.bestPractices;
     let aSum = a.lighthouse.performance + a.lighthouse.accessibility + a.lighthouse.seo + a.lighthouse.bestPractices;
     if(bSum === aSum) {
+      if(a.axe.error || b.axe.error) {
+        return this._getBadKeyCheckSort(a.axe, b.axe, "error");
+      }
+
       if(a.axe.violations !== b.axe.violations) {
         // lower violations are better
         return a.axe.violations - b.axe.violations;
