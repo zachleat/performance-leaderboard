@@ -1,4 +1,5 @@
 const AxeTester = require("./AxeTester");
+const CarbonTester = require("./CarbonTester");
 const LighthouseMedianRun = require("../lib/lh-median-run.js");
 
 class ResultLogger {
@@ -125,6 +126,10 @@ class ResultLogger {
     let bSum = b.lighthouse.performance + b.lighthouse.accessibility + b.lighthouse.seo + b.lighthouse.bestPractices;
     let aSum = a.lighthouse.performance + a.lighthouse.accessibility + a.lighthouse.seo + a.lighthouse.bestPractices;
     if(bSum === aSum) {
+      if(a.axe.error || b.axe.error) {
+        return this._getBadKeyCheckSort(a.axe, b.axe, "error");
+      }
+
       if(a.axe.violations !== b.axe.violations) {
         // lower violations are better
         return a.axe.violations - b.axe.violations;
@@ -175,7 +180,7 @@ class ResultLogger {
     // Bad certificate, maybe
     if(result.categories.performance.score === null &&
       result.categories.accessibility.score === null &&
-      result.categories['best-practices'].score === null && 
+      result.categories['best-practices'].score === null &&
       result.categories.seo.score === null) {
       return {
         url: result.finalUrl,
@@ -274,10 +279,15 @@ class ResultLogger {
 
     // Insert accessibilityRank into perfResults
     let a11yResults = [];
+    let carbonResults = [];
     let axeTester = new AxeTester();
+    let carbonTester = new CarbonTester();
     axeTester.logDirectory = this.logDirectory;
     axeTester.writeLogs = this.writeLogs;
     axeTester.readFromLogs = this.readFromLogs;
+    carbonTester.logDirectory = this.logDirectory;
+    carbonTester.writeLogs = this.writeLogs;
+    carbonTester.readFromLogs = this.readFromLogs;
 
     await axeTester.start();
 
@@ -287,9 +297,16 @@ class ResultLogger {
       let result = this.getLowestResultForUrl(url, this.sortByAccessibilityBeforeAxe.bind(this));
 
       if(result) {
-        console.log( `Axe scan (${++count} of ${size}) for ${url}` );
+        console.log(`Axe scan (${++count} of ${size}) for ${url}`);
         result.axe = await axeTester.getResults(url);
+        console.log(`CO2 scan (${count} of ${size}) for ${url}`);
+        const carbon = await carbonTester.getResults(url);
+        if(carbon.data) {
+          result.carbon = carbon.data;
+        }
+
         a11yResults.push(result);
+        carbonResults.push(result);
       }
     }
 
@@ -307,7 +324,15 @@ class ResultLogger {
           perfResult.ranks.accessibility = a11yRank;
           perfResult.axe = a11yResult.axe;
         }
+
+        for(let carbonResult of carbonResults) {
+          if(carbonResult.url === perfResult.url) {
+            if(carbonResult.carbon)
+            perfResult.carbon = carbonResult.carbon;
+          }
+        }
       }
+
       a11yRank++;
     }
 
