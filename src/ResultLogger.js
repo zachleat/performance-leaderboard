@@ -31,7 +31,6 @@ class ResultLogger {
     return this._logDir;
   }
 
-
   set carbonAudit(isEnabled) {
     this._carbonAudit = isEnabled;
   }
@@ -295,7 +294,6 @@ class ResultLogger {
     axeTester.writeLogs = this.writeLogs;
     axeTester.readFromLogs = this.readFromLogs;
 
-
     // Carbon audit
     if(this.carbonAudit) {
       carbonTester = new CarbonTester();
@@ -303,7 +301,6 @@ class ResultLogger {
       carbonTester.writeLogs = this.writeLogs;
       carbonTester.readFromLogs = this.readFromLogs;
     }
-
 
     await axeTester.start();
 
