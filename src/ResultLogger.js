@@ -31,6 +31,15 @@ class ResultLogger {
     return this._logDir;
   }
 
+
+  set carbonAudit(isEnabled) {
+    this._carbonAudit = isEnabled;
+  }
+
+  get carbonAudit() {
+    return this._carbonAudit;
+  }
+
   _getGoodKeyCheckSort(a, b, key) {
     if(b[key] && a[key]) {
       return 0;
@@ -281,13 +290,20 @@ class ResultLogger {
     let a11yResults = [];
     let carbonResults = [];
     let axeTester = new AxeTester();
-    let carbonTester = new CarbonTester();
+    let carbonTester;
     axeTester.logDirectory = this.logDirectory;
     axeTester.writeLogs = this.writeLogs;
     axeTester.readFromLogs = this.readFromLogs;
-    carbonTester.logDirectory = this.logDirectory;
-    carbonTester.writeLogs = this.writeLogs;
-    carbonTester.readFromLogs = this.readFromLogs;
+
+
+    // Carbon audit
+    if(this.carbonAudit) {
+      carbonTester = new CarbonTester();
+      carbonTester.logDirectory = this.logDirectory;
+      carbonTester.writeLogs = this.writeLogs;
+      carbonTester.readFromLogs = this.readFromLogs;
+    }
+
 
     await axeTester.start();
 
@@ -299,14 +315,17 @@ class ResultLogger {
       if(result) {
         console.log(`Axe scan (${++count} of ${size}) for ${url}`);
         result.axe = await axeTester.getResults(url);
-        console.log(`CO2 scan (${count} of ${size}) for ${url}`);
-        const carbon = await carbonTester.getResults(url);
-        if(carbon.data) {
-          result.carbon = carbon.data;
+
+        if (carbonTester){
+          console.log(`CO2 scan (${count} of ${size}) for ${url}`);
+          const carbon = await carbonTester.getResults(url);
+          if(carbon.data) {
+            result.carbon = carbon.data;
+          }
+          carbonResults.push(result);
         }
 
         a11yResults.push(result);
-        carbonResults.push(result);
       }
     }
 
@@ -325,10 +344,12 @@ class ResultLogger {
           perfResult.axe = a11yResult.axe;
         }
 
-        for(let carbonResult of carbonResults) {
-          if(carbonResult.url === perfResult.url) {
-            if(carbonResult.carbon)
-            perfResult.carbon = carbonResult.carbon;
+        if(carbonResults.length) {
+          for(let carbonResult of carbonResults) {
+            if(carbonResult.url === perfResult.url) {
+              if(carbonResult.carbon)
+              perfResult.carbon = carbonResult.carbon;
+            }
           }
         }
       }
