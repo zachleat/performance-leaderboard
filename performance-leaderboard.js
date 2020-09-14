@@ -12,6 +12,7 @@ const LOG_DIRECTORY = ".log";
 async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) {
   let opts = Object.assign({
     writeLogs: true,
+    carbonAudit: false,
     logDirectory: LOG_DIRECTORY,
     readFromLogDirectory: false,
     // onlyCategories: ["performance", "accessibility"],
@@ -25,6 +26,7 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
   resultLog.logDirectory = opts.logDirectory;
   resultLog.writeLogs = opts.writeLogs;
   resultLog.readFromLogs = opts.readFromLogDirectory;
+  resultLog.carbonAudit = opts.carbonAudit;
 
   console.log( `Testing ${urls.length} site${urls.length !== 1 ? "s" : ""}:` );
 
