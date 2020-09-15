@@ -49,13 +49,16 @@ class CarbonTester {
   }
 
   async fetchNewResults(url) {
-    const results = await axios.get(`${APIUrl}${url}`);
+    let results;
 
-    // .then(resp => resp.json())
-    // .then(data => console.log(data))
-    // .catch(e => console.log(e))
-    if(this.writeLogs) {
-      await writeLog(this.getLogFilename(url), results.data, this.logDirectory);
+    try {
+      results = await axios.get(`${APIUrl}${url}`);
+
+      if(this.writeLogs && results && results.data) {
+        await writeLog(this.getLogFilename(url), results.data, this.logDirectory);
+      }
+    } catch (e) {
+      console.log( `Carbon Audit error with ${url}`, e );
     }
 
     return results;
