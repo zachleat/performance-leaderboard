@@ -48,6 +48,15 @@ class ResultLogger {
       return 1;
     }
   }
+  _getUndefinedCheckSort(a, b) {
+    if(b === undefined && a === undefined) {
+      return 0;
+    } else if(b === undefined) {
+      return -1;
+    } else if(a === undefined) {
+      return 1;
+    }
+  }
 
   sortByAccessibilityBeforeAxe(a, b) {
     if(a.error || b.error) {
@@ -125,6 +134,9 @@ class ResultLogger {
     let bSum = b.lighthouse.performance + b.lighthouse.accessibility + b.lighthouse.seo + b.lighthouse.bestPractices;
     let aSum = a.lighthouse.performance + a.lighthouse.accessibility + a.lighthouse.seo + a.lighthouse.bestPractices;
     if(bSum === aSum) {
+      if(a.axe === undefined || b.axe === undefined) {
+        return this._getUndefinedCheckSort(a.axe, b.axe);
+      }
       if(a.axe.error || b.axe.error) {
         return this._getBadKeyCheckSort(a.axe, b.axe, "error");
       }
