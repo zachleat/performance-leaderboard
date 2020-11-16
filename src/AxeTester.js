@@ -1,4 +1,4 @@
-const { AxePuppeteer } = require("axe-puppeteer");
+const { AxePuppeteer } = require("@axe-core/puppeteer");
 const puppeteer = require("puppeteer");
 const writeLog = require("./WriteLog");
 const readLog = require("./ReadLog");
@@ -96,7 +96,7 @@ class AxeTester {
       }
 
       return {
-        error: e
+        error: JSON.stringify(e)
       }
     }
   }
