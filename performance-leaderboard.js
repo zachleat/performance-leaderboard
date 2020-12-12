@@ -19,6 +19,8 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
     chromeFlags: ['--headless'],
     freshChrome: "site", // or "run"
     launchOptions: {},
+    // callback after each lighthouse result
+    resultHook: function(result) {}, // async compatible
   }, options);
   let config = null;
 
@@ -66,6 +68,10 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
           if(opts.writeLogs) {
             await writeLog(filename, rawResult, opts.logDirectory);
           }
+        }
+
+        if(opts.resultHook && typeof opts.resultHook === "function") {
+          await opts.resultHook(resultLog.mapResult(rawResult), rawResult);
         }
 
         resultLog.add(url, rawResult);
