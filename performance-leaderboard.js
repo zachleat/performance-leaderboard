@@ -19,7 +19,11 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
     chromeFlags: ['--headless'],
     freshChrome: "site", // or "run"
     launchOptions: {},
+    // callback before each lighthouse test
+    beforeHook: function(url) {}, // async compatible
     // callback after each lighthouse result
+    afterHook: function(result) {}, // async compatible
+    // deprecated
     resultHook: function(result) {}, // async compatible
   }, options);
   let config = null;
@@ -57,6 +61,11 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
       }
 
       console.log( `(Site ${++count} of ${urls.length}, run ${j+1} of ${numberOfRuns}): ${url}` );
+
+      if(opts.beforeHook && typeof opts.beforeHook === "function") {
+        await opts.beforeHook(url);
+      }
+
       try {
         let filename = `lighthouse-${slugify(url)}-${j+1}-of-${numberOfRuns}.json`;
         let rawResult;
@@ -70,8 +79,9 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
           }
         }
 
-        if(opts.resultHook && typeof opts.resultHook === "function") {
-          await opts.resultHook(resultLog.mapResult(rawResult), rawResult);
+        let afterHook = opts.afterHook || opts.resultHook; // resultHook is deprecated (renamed)
+        if(afterHook && typeof afterHook === "function") {
+          await afterHook(resultLog.mapResult(rawResult), rawResult);
         }
 
         resultLog.add(url, rawResult);

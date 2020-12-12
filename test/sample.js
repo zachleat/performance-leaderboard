@@ -2,7 +2,7 @@ const PerfLeaderboard = require("../.");
 
 (async function() {
 	let urls = [
-		"https://www.gatsbyjs.org/",
+		"https://www.gatsbyjs.com/",
 		"https://www.11ty.dev/",
 		// "https://vuejs.org/",
 		// "https://reactjs.org/",
@@ -18,7 +18,10 @@ const PerfLeaderboard = require("../.");
 	];
 
 	let finalResults = await PerfLeaderboard(urls, 1, {
-		resultHook: function(result) {
+		beforeHook: function(url) {
+			console.log( "hi to ", url );
+		},
+		afterHook: function(result) {
 			console.log( result );
 		}
 	});
