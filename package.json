@@ -1,6 +1,6 @@
 {
   "name": "performance-leaderboard",
-  "version": "3.2.2",
+  "version": "3.3.0",
   "main": "performance-leaderboard.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
