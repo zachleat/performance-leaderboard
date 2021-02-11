@@ -225,6 +225,7 @@ class ResultLogger {
           result.categories.seo.score * 100
       },
       firstContentfulPaint: result.audits['first-contentful-paint'].numericValue,
+      firstMeaningfulPaint: result.audits['first-meaningful-paint'].numericValue,
       speedIndex: result.audits['speed-index'].numericValue,
       largestContentfulPaint: result.audits['largest-contentful-paint'].numericValue,
       totalBlockingTime: result.audits['total-blocking-time'].numericValue,
