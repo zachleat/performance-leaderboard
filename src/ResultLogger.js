@@ -31,6 +31,14 @@ class ResultLogger {
     return this._logDir;
   }
 
+  set axePuppeteerTimeout(timeout) {
+    this._axePuppeteerTimeout = timeout;
+  }
+
+  get axePuppeteerTimeout() {
+    return this._axePuppeteerTimeout;
+  }
+
   set carbonAudit(isEnabled) {
     this._carbonAudit = isEnabled;
   }
@@ -314,6 +322,7 @@ class ResultLogger {
     axeTester.logDirectory = this.logDirectory;
     axeTester.writeLogs = this.writeLogs;
     axeTester.readFromLogs = this.readFromLogs;
+    axeTester.puppeteerTimeout = this.axePuppeteerTimeout;
 
     // Carbon audit
     if(this.carbonAudit) {

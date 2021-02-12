@@ -8,6 +8,7 @@ const chromePath = require("puppeteer").executablePath()
 
 const NUMBER_OF_RUNS = 3;
 const LOG_DIRECTORY = ".log";
+const AXE_PUPPETEER_TIMEOUT = 3000
 
 async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) {
   let opts = Object.assign({
@@ -15,6 +16,7 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
     carbonAudit: false,
     logDirectory: LOG_DIRECTORY,
     readFromLogDirectory: false,
+    axePuppeteerTimeout: AXE_PUPPETEER_TIMEOUT,
     // onlyCategories: ["performance", "accessibility"],
     chromeFlags: ['--headless'],
     freshChrome: "site", // or "run"
@@ -33,6 +35,7 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
   resultLog.writeLogs = opts.writeLogs;
   resultLog.readFromLogs = opts.readFromLogDirectory;
   resultLog.carbonAudit = opts.carbonAudit;
+  resultLog.axePuppeteerTimeout = opts.axePuppeteerTimeout;
 
   console.log( `Testing ${urls.length} site${urls.length !== 1 ? "s" : ""}:` );
 
