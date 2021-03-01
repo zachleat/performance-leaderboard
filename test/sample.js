@@ -17,7 +17,7 @@ const PerfLeaderboard = require("../.");
 		"https://www.netlify.com/",
 	];
 
-	let finalResults = await PerfLeaderboard(urls, 1, {
+	let finalResults = await PerfLeaderboard(urls, 3, {
 		beforeHook: function(url) {
 			console.log( "hi to ", url );
 		},
