@@ -14,16 +14,16 @@ const PerfLeaderboard = require("../.");
 		// "https://svelte.dev/",
 		// "https://gohugo.io/",
 		// "https://redwoodjs.com/"
-		"https://www.netlify.com/",
+		// "https://www.netlify.com/",
 	];
 
 	let finalResults = await PerfLeaderboard(urls, 3, {
-		beforeHook: function(url) {
-			console.log( "hi to ", url );
-		},
-		afterHook: function(result) {
-			console.log( result );
-		}
+		// beforeHook: function(url) {
+		// 	console.log( "hi to ", url );
+		// },
+		// afterHook: function(result) {
+		// 	console.log( result );
+		// }
 	});
-	// console.log( finalResults );
+	console.log( finalResults );
 })();
