@@ -101,3 +101,7 @@ In the return object you’ll see a `ranks` object listing how this site compare
 	* The sum of all four Lighthouse scores.
 	* Tiebreaker given to the lower Axe violations.
 	* Second tiebreaker given to the lower Speed Index / Total Page Weight ratio.
+
+## Changelog
+
+* `v4.0.0` Major version upgrade of `lighthouse` dependency from v6.5 to v7.2
