@@ -1,6 +1,6 @@
 {
   "name": "performance-leaderboard",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "main": "performance-leaderboard.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -30,7 +30,7 @@
     "chrome-launcher": "^0.13.4",
     "fs-extra": "^9.1.0",
     "lighthouse": "^7.3.0",
-    "puppeteer": "^8.0.0",
+    "puppeteer": "^9.0.0",
     "slugify": "^1.5.0"
   }
 }
