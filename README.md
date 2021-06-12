@@ -57,7 +57,8 @@ const PerfLeaderboard = require("performance-leaderboard");
 
 2. Run `node sample.js`.
 
-## Sample Output
+<details>
+<summary><h2>Sample Output</h2></summary>
 
 ```js
 [ { url: 'https://www.11ty.dev/',
@@ -119,6 +120,8 @@ const PerfLeaderboard = require("performance-leaderboard");
        cleanerThan: 0.93
      } } ]
 ```
+
+</details>
 
 ## Rankings
 
