@@ -105,3 +105,5 @@ In the return object you’ll see a `ranks` object listing how this site compare
 ## Changelog
 
 * `v4.0.0` Major version upgrade of `lighthouse` dependency from v6.5 to v7.2
+* `v4.1.0` Update `lighthouse` to v7.3
+* `v5.0.0` Update `lighthouse` to v8.0

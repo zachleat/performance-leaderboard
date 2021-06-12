@@ -4,7 +4,7 @@ const chromeLauncher = require("chrome-launcher");
 const ResultLogger = require("./src/ResultLogger");
 const writeLog = require("./src/WriteLog");
 const readLog = require("./src/ReadLog");
-const chromePath = require("puppeteer").executablePath()
+const chromePuppeteerPath = require("puppeteer").executablePath()
 
 const NUMBER_OF_RUNS = 3;
 const LOG_DIRECTORY = ".log";
@@ -46,7 +46,7 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
       chrome = await chromeLauncher.launch(Object.assign({
         chromeFlags: opts.chromeFlags,
         // reuse puppeteer chrome path
-        chromePath: chromePath,
+        chromePath: chromePuppeteerPath,
       }, opts.launchOptions));
       opts.port = chrome.port;
     }
@@ -55,7 +55,7 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
         chrome = await chromeLauncher.launch(Object.assign({
           chromeFlags: opts.chromeFlags,
           // reuse puppeteer chrome path
-          chromePath: chromePath,
+          chromePath: chromePuppeteerPath,
         }, opts.launchOptions));
         opts.port = chrome.port;
       }
@@ -67,6 +67,7 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
       }
 
       try {
+        slugify.extend({":": "-", "/": "-"});
         let filename = `lighthouse-${slugify(url)}-${j+1}-of-${numberOfRuns}.json`;
         let rawResult;
         if(opts.readFromLogDirectory) {
