@@ -8,7 +8,7 @@ const chromePuppeteerPath = require("puppeteer").executablePath()
 
 const NUMBER_OF_RUNS = 3;
 const LOG_DIRECTORY = ".log";
-const AXE_PUPPETEER_TIMEOUT = 3000
+const AXE_PUPPETEER_TIMEOUT = 30000;
 
 async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) {
   let opts = Object.assign({
