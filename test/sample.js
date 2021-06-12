@@ -18,6 +18,7 @@ const PerfLeaderboard = require("../.");
 	];
 
 	let finalResults = await PerfLeaderboard(urls, 3, {
+		carbonAudit: true
 		// beforeHook: function(url) {
 		// 	console.log( "hi to ", url );
 		// },

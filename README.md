@@ -11,6 +11,7 @@ npm install performance-leaderboard
 ## Features
 
 * Median Run Selection: `performance-leaderboard` will run Lighthouse on the same site multiple times and select the Median run. It factors in First Contentful Paint, Largest Contentful Paint, and Time to Interactive when [selecting the median run](https://github.com/zachleat/performance-leaderboard/blob/master/lib/lh-median-run.js#L55).
+* Carbon Footprint: by default carbon auditing is disabled but can be enabled in the options by setting `{ carbonAudit: true }`. The results then will be available as a `carbon` object, check the sample output below.
 
 ## Usage
 
@@ -34,6 +35,7 @@ const PerfLeaderboard = require("performance-leaderboard");
 
   // Create the options object (not required)
   const options = {
+    axePuppeteerTimeout: 30000, // 30 seconds
     writeLogs: true, // Store audit data
     carbonAudit: true, // Carbon audits are disabed by default
     logDirectory: '.log', // Default audit data files stored at `.log`
@@ -61,64 +63,69 @@ const PerfLeaderboard = require("performance-leaderboard");
 <summary>Sample Output</summary>
 
 ```js
-[ { url: 'https://www.11ty.dev/',
+[ {
+    url: 'https://www.11ty.dev/',
     requestedUrl: 'https://www.11ty.dev/',
-    timestamp: 1595203240682,
-    ranks:
-     { hundos: 1, performance: 1, accessibility: 1, cumulative: 1 },
-    lighthouse:
-     { version: '6.1.0',
-       performance: 1,
-       accessibility: 1,
-       bestPractices: 1,
-       seo: 1,
-       total: 400 },
-    firstContentfulPaint: 1222.9119999999998,
-    firstMeaningfulPaint: 4687.105999999999,
-    speedIndex: 1345.9715418833482,
-    largestContentfulPaint: 1222.9119999999998,
-    totalBlockingTime: 125.99999999999989,
-    cumulativeLayoutShift: 0,
-    timeToInteractive: 1398.9119999999998,
-    maxPotentialFirstInputDelay: 257.9999999999998,
-    timeToFirstByte: 49.84300000000002,
-    weight:
-     { summary: '21 requests • 80 KiB',
-       total: 94115,
-       image: 28931,
-       imageCount: 17,
-       script: 7429,
-       scriptCount: 1,
-       document: 26378,
-       font: 15549,
-       fontCount: 1,
-       stylesheet: 3196,
-       stylesheetCount: 1,
-       thirdParty: 15549,
-       thirdPartyCount: 1 },
-    axe: { passes: 682, violations: 0 },
-    carbon:
-     { url: "11ty.dev",
-       bytes: 123059,
-       green: false,
-       id: 1591854,
-       timestamp: 1600177336,
-       statistics: {
-         adjustedBytes: 92909,
-         energy: 0.00015618348959833383,
-         co2: {
-           grid: {
-             grams: 0.07418715755920857,
-             litres: 0.04126289703443181
-           },
-           renewable: {
-             grams: 0.06723491815534086,
-             litres: 0.037396061478000585
-           }
-         }
-       },
-       cleanerThan: 0.93
-     } } ]
+    timestamp: 1623525988492,
+    ranks: { hundos: 1, performance: 1, accessibility: 1, cumulative: 1 },
+    lighthouse: {
+      version: '8.0.0',
+      performance: 1,
+      accessibility: 1,
+      bestPractices: 1,
+      seo: 1,
+      total: 400
+    },
+    firstContentfulPaint: 1152.3029999999999,
+    firstMeaningfulPaint: 1152.3029999999999,
+    speedIndex: 1152.3029999999999,
+    largestContentfulPaint: 1152.3029999999999,
+    totalBlockingTime: 36,
+    cumulativeLayoutShift: 0.02153049045138889,
+    timeToInteractive: 1238.3029999999999,
+    maxPotentialFirstInputDelay: 97,
+    timeToFirstByte: 54.63900000000001,
+    weight: {
+      summary: '14 requests • 178 KiB',
+      total: 182145,
+      image: 124327,
+      imageCount: 10,
+      script: 7824,
+      scriptCount: 1,
+      document: 30431,
+      font: 15649,
+      fontCount: 1,
+      stylesheet: 3914,
+      stylesheetCount: 1,
+      thirdParty: 15649,
+      thirdPartyCount: 1
+    },
+    run: { number: 2, total: 3 },
+    axe: { passes: 850, violations: 0 },
+    carbon: {
+      url: '11ty.dev',
+      bytes: 532080,
+      green: true,
+      id: 6234727,
+      timestamp: 1623526058,
+      statistics: {
+        adjustedBytes: 92909,
+        energy: 0.00015618348959833383,
+        co2: {
+          grid: {
+            grams: 0.07418715755920857,
+            litres: 0.04126289703443181
+          },
+          renewable: {
+            grams: 0.06723491815534086,
+            litres: 0.037396061478000585
+          }
+        }
+      },
+      cleanerThan: 0.8
+    }
+  }
+]
 ```
 
 </details>
@@ -141,10 +148,6 @@ In the return object you’ll see a `ranks` object listing how this site compare
 	* The sum of all four Lighthouse scores.
 	* Tiebreaker given to the lower Axe violations.
 	* Second tiebreaker given to the lower Speed Index / Total Page Weight ratio.
-
-## Carbon Footprint
-
-By default carbon auditing is disabed but can be enabled in the options by setting `{ carbonAudit: true }`. The results then will be available as a `carbon` object, check the sample output above
 
 ## Changelog
 
