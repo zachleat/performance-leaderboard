@@ -31,6 +31,14 @@ class ResultLogger {
     return this._logDir;
   }
 
+  set axePuppeteerTimeout(timeout) {
+    this._axePuppeteerTimeout = timeout;
+  }
+
+  get axePuppeteerTimeout() {
+    return this._axePuppeteerTimeout;
+  }
+
   set carbonAudit(isEnabled) {
     this._carbonAudit = isEnabled;
   }
@@ -54,6 +62,15 @@ class ResultLogger {
     } else if(b[key]) {
       return -1;
     } else if(a[key]) {
+      return 1;
+    }
+  }
+  _getUndefinedCheckSort(a, b) {
+    if(b === undefined && a === undefined) {
+      return 0;
+    } else if(b === undefined) {
+      return -1;
+    } else if(a === undefined) {
       return 1;
     }
   }
@@ -134,6 +151,9 @@ class ResultLogger {
     let bSum = b.lighthouse.performance + b.lighthouse.accessibility + b.lighthouse.seo + b.lighthouse.bestPractices;
     let aSum = a.lighthouse.performance + a.lighthouse.accessibility + a.lighthouse.seo + a.lighthouse.bestPractices;
     if(bSum === aSum) {
+      if(a.axe === undefined || b.axe === undefined) {
+        return this._getUndefinedCheckSort(a.axe, b.axe);
+      }
       if(a.axe.error || b.axe.error) {
         return this._getBadKeyCheckSort(a.axe, b.axe, "error");
       }
@@ -213,6 +233,7 @@ class ResultLogger {
           result.categories.seo.score * 100
       },
       firstContentfulPaint: result.audits['first-contentful-paint'].numericValue,
+      firstMeaningfulPaint: result.audits['first-meaningful-paint'].numericValue,
       speedIndex: result.audits['speed-index'].numericValue,
       largestContentfulPaint: result.audits['largest-contentful-paint'].numericValue,
       totalBlockingTime: result.audits['total-blocking-time'].numericValue,
@@ -241,6 +262,15 @@ class ResultLogger {
   getMedianResultForUrl(url) {
     if(this.results[url] && this.results[url].length) {
       let goodResults = this.results[url].filter(entry => entry && !entry.error && entry.lighthouse.performance !== null);
+      
+      goodResults = goodResults.map((entry, j) => {
+        entry.run = {
+          number: j + 1,
+          total: goodResults.length
+        };
+        return entry;
+      })
+
       if(!goodResults.length) {
         // if they’re all errors just return the first
         return this.results[url][0];
@@ -293,6 +323,7 @@ class ResultLogger {
     axeTester.logDirectory = this.logDirectory;
     axeTester.writeLogs = this.writeLogs;
     axeTester.readFromLogs = this.readFromLogs;
+    axeTester.puppeteerTimeout = this.axePuppeteerTimeout;
 
     // Carbon audit
     if(this.carbonAudit) {

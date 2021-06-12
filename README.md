@@ -73,6 +73,7 @@ const PerfLeaderboard = require("performance-leaderboard");
        seo: 1,
        total: 400 },
     firstContentfulPaint: 1222.9119999999998,
+    firstMeaningfulPaint: 4687.105999999999,
     speedIndex: 1345.9715418833482,
     largestContentfulPaint: 1222.9119999999998,
     totalBlockingTime: 125.99999999999989,
@@ -141,3 +142,10 @@ In the return object you’ll see a `ranks` object listing how this site compare
 ## Carbon Footprint
 
 By default carbon auditing is disabed but can be enabled in the options by setting `{ carbonAudit: true }`. The results then will be available as a `carbon` object, check the sample output above
+
+## Changelog
+
+* `v4.0.0` Major version upgrade of `lighthouse` dependency from v6.5 to v7.2
+* `v4.1.0` Update `lighthouse` to v7.3
+* `v5.0.0` Update `lighthouse` to v8.0
+

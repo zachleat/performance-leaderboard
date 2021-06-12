@@ -4,10 +4,11 @@ const chromeLauncher = require("chrome-launcher");
 const ResultLogger = require("./src/ResultLogger");
 const writeLog = require("./src/WriteLog");
 const readLog = require("./src/ReadLog");
-const chromePath = require("puppeteer").executablePath()
+const chromePuppeteerPath = require("puppeteer").executablePath()
 
 const NUMBER_OF_RUNS = 3;
 const LOG_DIRECTORY = ".log";
+const AXE_PUPPETEER_TIMEOUT = 3000
 
 async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) {
   let opts = Object.assign({
@@ -15,10 +16,17 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
     carbonAudit: false,
     logDirectory: LOG_DIRECTORY,
     readFromLogDirectory: false,
+    axePuppeteerTimeout: AXE_PUPPETEER_TIMEOUT,
     // onlyCategories: ["performance", "accessibility"],
     chromeFlags: ['--headless'],
     freshChrome: "site", // or "run"
     launchOptions: {},
+    // callback before each lighthouse test
+    beforeHook: function(url) {}, // async compatible
+    // callback after each lighthouse result
+    afterHook: function(result) {}, // async compatible
+    // deprecated
+    resultHook: function(result) {}, // async compatible
   }, options);
   let config = null;
 
@@ -27,6 +35,7 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
   resultLog.writeLogs = opts.writeLogs;
   resultLog.readFromLogs = opts.readFromLogDirectory;
   resultLog.carbonAudit = opts.carbonAudit;
+  resultLog.axePuppeteerTimeout = opts.axePuppeteerTimeout;
 
   console.log( `Testing ${urls.length} site${urls.length !== 1 ? "s" : ""}:` );
 
@@ -40,7 +49,7 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
       chrome = await chromeLauncher.launch(Object.assign({
         chromeFlags: opts.chromeFlags,
         // reuse puppeteer chrome path
-        chromePath: chromePath,
+        chromePath: chromePuppeteerPath,
       }, opts.launchOptions));
       opts.port = chrome.port;
     }
@@ -49,13 +58,19 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
         chrome = await chromeLauncher.launch(Object.assign({
           chromeFlags: opts.chromeFlags,
           // reuse puppeteer chrome path
-          chromePath: chromePath,
+          chromePath: chromePuppeteerPath,
         }, opts.launchOptions));
         opts.port = chrome.port;
       }
 
       console.log( `(Site ${++count} of ${urls.length}, run ${j+1} of ${numberOfRuns}): ${url}` );
+
+      if(opts.beforeHook && typeof opts.beforeHook === "function") {
+        await opts.beforeHook(url);
+      }
+
       try {
+        slugify.extend({":": "-", "/": "-"});
         let filename = `lighthouse-${slugify(url)}-${j+1}-of-${numberOfRuns}.json`;
         let rawResult;
         if(opts.readFromLogDirectory) {
@@ -66,6 +81,11 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
           if(opts.writeLogs) {
             await writeLog(filename, rawResult, opts.logDirectory);
           }
+        }
+
+        let afterHook = opts.afterHook || opts.resultHook; // resultHook is deprecated (renamed)
+        if(afterHook && typeof afterHook === "function") {
+          await afterHook(resultLog.mapResult(rawResult), rawResult);
         }
 
         resultLog.add(url, rawResult);
