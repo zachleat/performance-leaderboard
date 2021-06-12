@@ -67,6 +67,7 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
       }
 
       try {
+        slugify.extend({":": "-", "/": "-"});
         let filename = `lighthouse-${slugify(url)}-${j+1}-of-${numberOfRuns}.json`;
         let rawResult;
         if(opts.readFromLogDirectory) {
