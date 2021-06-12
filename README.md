@@ -58,6 +58,7 @@ const PerfLeaderboard = require("performance-leaderboard");
        seo: 1,
        total: 400 },
     firstContentfulPaint: 1222.9119999999998,
+    firstMeaningfulPaint: 4687.105999999999,
     speedIndex: 1345.9715418833482,
     largestContentfulPaint: 1222.9119999999998,
     totalBlockingTime: 125.99999999999989,
