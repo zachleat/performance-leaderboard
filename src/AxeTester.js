@@ -3,7 +3,7 @@ const puppeteer = require("puppeteer");
 const writeLog = require("./WriteLog");
 const readLog = require("./ReadLog");
 const slugify = require("slugify");
- 
+
 class AxeTester {
   set readFromLogs(doRead) {
     this._readFromLogs = doRead;
@@ -21,6 +21,13 @@ class AxeTester {
     return this._writeLogs;
   }
 
+  set puppeteerTimeout(timeout) {
+    this._puppeteerTimeout = timeout;
+  }
+
+  get puppeteerTimeout() {
+    return this._puppeteerTimeout;
+  }
 
   set logDirectory(dir) {
     this._logDir = dir;
@@ -69,7 +76,8 @@ class AxeTester {
     this.page = await this.browser.newPage();
     await this.page.setBypassCSP(true);
     await this.page.goto(url, {
-      waitUntil: ["load", "networkidle0"]
+      waitUntil: ["load", "networkidle0"],
+      timeout: this.puppeteerTimeout
     });
 
     const results = await new AxePuppeteer(this.page).analyze();
