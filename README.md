@@ -32,11 +32,26 @@ const PerfLeaderboard = require("performance-leaderboard");
 		"https://gohugo.io/",
 	];
 
-	// Run each site 3 times
+  // Create the options object (not required)
+  const options = {
+    writeLogs: true, // Store audit data
+    carbonAudit: true, // Carbon audits are disabed by default
+    logDirectory: '.log', // Default audit data files stored at `.log`
+    readFromLogDirectory: false, // Skip tests with existing logs
+    // onlyCategories: ["performance", "accessibility"],
+    chromeFlags: ['--headless'],
+    freshChrome: "site", // or "run"
+    launchOptions: {}, // Puppeteer launch options
+  }
+
+	// Run each site 3 times with default options
 	console.log( await PerfLeaderboard(urls) );
 
-	// Or run each site 5 times
-	console.log( await PerfLeaderboard(urls, 5) );
+	// Or run each site 5 times with default options
+  console.log( await PerfLeaderboard(urls, 5) );
+
+	// Or run each site 5 times with custom options
+	console.log( await PerfLeaderboard(urls, 5, options) );
 })();
 ```
 
@@ -80,7 +95,29 @@ const PerfLeaderboard = require("performance-leaderboard");
        stylesheetCount: 1,
        thirdParty: 15549,
        thirdPartyCount: 1 },
-    axe: { passes: 682, violations: 0 } } ]
+    axe: { passes: 682, violations: 0 },
+    carbon:
+     { url: "11ty.dev",
+       bytes: 123059,
+       green: false,
+       id: 1591854,
+       timestamp: 1600177336,
+       statistics: {
+         adjustedBytes: 92909,
+         energy: 0.00015618348959833383,
+         co2: {
+           grid: {
+             grams: 0.07418715755920857,
+             litres: 0.04126289703443181
+           },
+           renewable: {
+             grams: 0.06723491815534086,
+             litres: 0.037396061478000585
+           }
+         }
+       },
+       cleanerThan: 0.93
+     } } ]
 ```
 
 ## Rankings
@@ -102,8 +139,13 @@ In the return object you’ll see a `ranks` object listing how this site compare
 	* Tiebreaker given to the lower Axe violations.
 	* Second tiebreaker given to the lower Speed Index / Total Page Weight ratio.
 
+## Carbon Footprint
+
+By default carbon auditing is disabed but can be enabled in the options by setting `{ carbonAudit: true }`. The results then will be available as a `carbon` object, check the sample output above
+
 ## Changelog
 
 * `v4.0.0` Major version upgrade of `lighthouse` dependency from v6.5 to v7.2
 * `v4.1.0` Update `lighthouse` to v7.3
 * `v5.0.0` Update `lighthouse` to v8.0
+
