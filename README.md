@@ -11,7 +11,7 @@ npm install performance-leaderboard
 ## Features
 
 * Median Run Selection: `performance-leaderboard` will run Lighthouse on the same site multiple times and select the Median run. It factors in First Contentful Paint, Largest Contentful Paint, and Time to Interactive when [selecting the median run](https://github.com/zachleat/performance-leaderboard/blob/master/lib/lh-median-run.js#L55).
-* Carbon Footprint: by default carbon auditing is disabled but can be enabled in the options by setting `{ carbonAudit: true }`. The results then will be available as a `carbon` object, check the sample output below.
+* Carbon Footprint: by default carbon auditing is disabled but can be enabled in the options by setting `{ carbonAudit: true }`. The results then will be available as a `carbon` object, check the sample output below. Testing provided by [Website Carbon Calculator](https://www.websitecarbon.com/).
 
 ## Usage
 
@@ -37,7 +37,7 @@ const PerfLeaderboard = require("performance-leaderboard");
 	const options = {
 		axePuppeteerTimeout: 30000, // 30 seconds
 		writeLogs: true, // Store audit data
-		carbonAudit: true, // Carbon audits are disabed by default
+		carbonAudit: true, // Carbon audits via websitecarbon.com
 		logDirectory: '.log', // Default audit data files stored at `.log`
 		readFromLogDirectory: false, // Skip tests with existing logs
 		// onlyCategories: ["performance", "accessibility"],
@@ -63,7 +63,8 @@ const PerfLeaderboard = require("performance-leaderboard");
 <summary>Sample Output</summary>
 
 ```js
-[ {
+[
+	{
 		url: 'https://www.11ty.dev/',
 		requestedUrl: 'https://www.11ty.dev/',
 		timestamp: 1623525988492,
@@ -154,4 +155,5 @@ In the return object you’ll see a `ranks` object listing how this site compare
 * `v4.0.0` Major version upgrade of `lighthouse` dependency from v6.5 to v7.2
 * `v4.1.0` Update `lighthouse` to v7.3
 * `v5.0.0` Update `lighthouse` to v8.0
-
+* `v5.1.0` Adds `axePuppeteerTimeout` option. Adds `carbonAudit` option.
+* `v5.2.0` Update `lighthouse` from v8.0 to v8.2
