@@ -157,3 +157,4 @@ In the return object you’ll see a `ranks` object listing how this site compare
 * `v5.0.0` Update `lighthouse` to v8.0
 * `v5.1.0` Adds `axePuppeteerTimeout` option. Adds `carbonAudit` option.
 * `v5.2.0` Update `lighthouse` from v8.0 to v8.2
+* `v5.3.0` Update `lighthouse` from v8.2 to v8.5
