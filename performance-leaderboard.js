@@ -17,6 +17,7 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
     logDirectory: LOG_DIRECTORY,
     readFromLogDirectory: false,
     axePuppeteerTimeout: AXE_PUPPETEER_TIMEOUT,
+    bypassAxe: [], // skip axe checks
     // onlyCategories: ["performance", "accessibility"],
     chromeFlags: ['--headless'],
     freshChrome: "site", // or "run"
@@ -36,6 +37,7 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
   resultLog.readFromLogs = opts.readFromLogDirectory;
   resultLog.carbonAudit = opts.carbonAudit;
   resultLog.axePuppeteerTimeout = opts.axePuppeteerTimeout;
+  resultLog.bypassAxe = opts.bypassAxe;
 
   console.log( `Testing ${urls.length} site${urls.length !== 1 ? "s" : ""}:` );
 

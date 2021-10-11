@@ -324,6 +324,7 @@ class ResultLogger {
     axeTester.writeLogs = this.writeLogs;
     axeTester.readFromLogs = this.readFromLogs;
     axeTester.puppeteerTimeout = this.axePuppeteerTimeout;
+    axeTester.bypassAxe = this.bypassAxe;
 
     // Carbon audit
     if(this.carbonAudit) {

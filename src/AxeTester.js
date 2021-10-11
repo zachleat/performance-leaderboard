@@ -5,6 +5,10 @@ const readLog = require("./ReadLog");
 const slugify = require("slugify");
 
 class AxeTester {
+  constructor() {
+    this.bypassAxe = [];
+  }
+
   set readFromLogs(doRead) {
     this._readFromLogs = doRead;
   }
@@ -73,6 +77,12 @@ class AxeTester {
   }
 
   async fetchNewResults(url) {
+    if((this.bypassAxe || []).includes(url)) {
+      return {
+        error: "Skipping via configuration option."
+      }
+    }
+
     this.page = await this.browser.newPage();
     await this.page.setBypassCSP(true);
     await this.page.goto(url, {
