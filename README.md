@@ -11,7 +11,6 @@ npm install performance-leaderboard
 ## Features
 
 * Median Run Selection: `performance-leaderboard` will run Lighthouse on the same site multiple times and select the Median run. It factors in First Contentful Paint, Largest Contentful Paint, and Time to Interactive when [selecting the median run](https://github.com/zachleat/performance-leaderboard/blob/master/lib/lh-median-run.js#L55).
-* Carbon Footprint: by default carbon auditing is disabled but can be enabled in the options by setting `{ carbonAudit: true }`. The results then will be available as a `carbon` object, check the sample output below. Testing provided by [Website Carbon Calculator](https://www.websitecarbon.com/).
 
 ## Usage
 
@@ -37,7 +36,6 @@ const PerfLeaderboard = require("performance-leaderboard");
 	const options = {
 		axePuppeteerTimeout: 30000, // 30 seconds
 		writeLogs: true, // Store audit data
-		carbonAudit: true, // Carbon audits via websitecarbon.com
 		logDirectory: '.log', // Default audit data files stored at `.log`
 		readFromLogDirectory: false, // Skip tests with existing logs
 		// onlyCategories: ["performance", "accessibility"],
@@ -103,28 +101,6 @@ const PerfLeaderboard = require("performance-leaderboard");
 		},
 		run: { number: 2, total: 3 },
 		axe: { passes: 850, violations: 0 },
-		carbon: {
-			url: '11ty.dev',
-			bytes: 532080,
-			green: true,
-			id: 6234727,
-			timestamp: 1623526058,
-			statistics: {
-				adjustedBytes: 92909,
-				energy: 0.00015618348959833383,
-				co2: {
-					grid: {
-						grams: 0.07418715755920857,
-						litres: 0.04126289703443181
-					},
-					renewable: {
-						grams: 0.06723491815534086,
-						litres: 0.037396061478000585
-					}
-				}
-			},
-			cleanerThan: 0.8
-		}
 	}
 ]
 ```
@@ -158,3 +134,4 @@ In the return object you’ll see a `ranks` object listing how this site compare
 * `v5.1.0` Adds `axePuppeteerTimeout` option. Adds `carbonAudit` option.
 * `v5.2.0` Update `lighthouse` from v8.0 to v8.2
 * `v5.3.0` Update `lighthouse` from v8.2 to v8.5
+* `v5.4.0` Removes `carbonAudit` option.

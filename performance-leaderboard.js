@@ -13,7 +13,6 @@ const AXE_PUPPETEER_TIMEOUT = 30000;
 async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) {
   let opts = Object.assign({
     writeLogs: true,
-    carbonAudit: false,
     logDirectory: LOG_DIRECTORY,
     readFromLogDirectory: false,
     axePuppeteerTimeout: AXE_PUPPETEER_TIMEOUT,
@@ -35,7 +34,6 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
   resultLog.logDirectory = opts.logDirectory;
   resultLog.writeLogs = opts.writeLogs;
   resultLog.readFromLogs = opts.readFromLogDirectory;
-  resultLog.carbonAudit = opts.carbonAudit;
   resultLog.axePuppeteerTimeout = opts.axePuppeteerTimeout;
   resultLog.bypassAxe = opts.bypassAxe;
 
