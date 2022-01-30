@@ -1,6 +1,6 @@
 {
   "name": "performance-leaderboard",
-  "version": "9.0.0",
+  "version": "9.2.0",
   "main": "performance-leaderboard.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -25,10 +25,10 @@
   },
   "homepage": "https://github.com/zachleat/performance-leaderboard#readme",
   "dependencies": {
-    "@axe-core/puppeteer": "^4.3.1",
+    "@axe-core/puppeteer": "^4.3.2",
     "chrome-launcher": "^0.15.0",
-    "lighthouse": "^9.0.0",
-    "puppeteer": "^11.0.0",
-    "slugify": "^1.6.2"
+    "lighthouse": "^9.2.0",
+    "puppeteer": "^13.1.2",
+    "slugify": "^1.6.5"
   }
 }
