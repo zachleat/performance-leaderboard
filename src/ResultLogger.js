@@ -115,19 +115,33 @@ class ResultLogger {
     return b.lighthouse.performance - a.lighthouse.performance;
   }
 
+  // image, script, document, font, stylesheets only (no videos, no third parties)
+  getTiebreakerWeight(result) {
+    return result.weight.document + result.weight.stylesheet + result.weight.font + result.weight.image + result.weight.script;
+  }
+
+  // speed index per KB
+  // low speed index with high weight is more impressive 😇 (lower is better)
+  // also add in TTFB and TBT
+  getTiebreakerValue(result) {
+    let weight = this.getTiebreakerWeight(result);
+    return 50000 * result.speedIndex / weight + result.timeToFirstByte + result.totalBlockingTime;
+  }
+
+  getLighthouseSum(result) {
+    return result.lighthouse.performance + result.lighthouse.accessibility + result.lighthouse.seo + result.lighthouse.bestPractices;
+  }
+
   sortByTotalHundos(a, b) {
     if(a.error || b.error) {
       return this._getBadKeyCheckSort(a, b, "error");
     }
 
-    let bSum = b.lighthouse.performance + b.lighthouse.accessibility + b.lighthouse.seo + b.lighthouse.bestPractices;
-    let aSum = a.lighthouse.performance + a.lighthouse.accessibility + a.lighthouse.seo + a.lighthouse.bestPractices;
+    let bSum = this.getLighthouseSum(b);
+    let aSum = this.getLighthouseSum(a);
     if(bSum === aSum) {
-      // speed index per KB
       // lower is better
-
-      // low speed index with high weight is more impressive 😇
-      return a.speedIndex / a.weight.total - b.speedIndex / b.weight.total;
+      return this.getTiebreakerValue(a) - this.getTiebreakerValue(b);
     }
 
     // higher is better
@@ -139,8 +153,8 @@ class ResultLogger {
       return this._getBadKeyCheckSort(a, b, "error");
     }
 
-    let bSum = b.lighthouse.performance + b.lighthouse.accessibility + b.lighthouse.seo + b.lighthouse.bestPractices;
-    let aSum = a.lighthouse.performance + a.lighthouse.accessibility + a.lighthouse.seo + a.lighthouse.bestPractices;
+    let bSum = this.getLighthouseSum(b);
+    let aSum = this.getLighthouseSum(a);
     if(bSum === aSum) {
       if(a.axe === undefined || b.axe === undefined) {
         return this._getUndefinedCheckSort(a.axe, b.axe);
@@ -154,11 +168,8 @@ class ResultLogger {
         return a.axe.violations - b.axe.violations;
       }
 
-      // speed index per KB
       // lower is better
-
-      // low speed index with high weight is more impressive 😇
-      return a.speedIndex / a.weight.total - b.speedIndex / b.weight.total;
+      return this.getTiebreakerValue(a) - this.getTiebreakerValue(b);
     }
 
     // higher is better
