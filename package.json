@@ -1,6 +1,6 @@
 {
   "name": "performance-leaderboard",
-  "version": "9.6.1-rc.1",
+  "version": "9.6.1-release.1",
   "main": "performance-leaderboard.js",
   "scripts": {
     "sample": "node test/sample"
