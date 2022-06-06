@@ -25,10 +25,10 @@
   "homepage": "https://github.com/zachleat/performance-leaderboard#readme",
   "dependencies": {
     "@axe-core/puppeteer": "^4.4.2",
-    "chrome-launcher": "^0.15.0",
+    "chrome-launcher": "^0.15.1",
     "lighthouse": "^9.6.1",
     "lodash.get": "^4.4.2",
-    "puppeteer": "^14.1.2",
+    "puppeteer": "^14.2.1",
     "slugify": "^1.6.5"
   }
 }
