@@ -27,6 +27,7 @@
     "@axe-core/puppeteer": "^4.4.2",
     "chrome-launcher": "^0.15.0",
     "lighthouse": "^9.6.1",
+    "lodash.get": "^4.4.2",
     "puppeteer": "^14.1.2",
     "slugify": "^1.6.5"
   }

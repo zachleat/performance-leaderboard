@@ -1,5 +1,6 @@
 const AxeTester = require("./AxeTester");
 const LighthouseMedianRun = require("../lib/lh-median-run.js");
+const lodashGet = require("lodash.get");
 
 class ResultLogger {
   constructor() {
@@ -308,6 +309,55 @@ class ResultLogger {
       }
       return entry;
     });
+
+    // Side quests
+    let sideQuestProperties = [
+      "-weight.total",
+      "+weight.total",
+      "-weight.document",
+      "+weight.document",
+      "-weight.script",
+      "+weight.script",
+      "-weight.image",
+      "+weight.image",
+      "-weight.font",
+      "+weight.font",
+      "+weight.fontCount",
+      "-timeToFirstByte",
+      "-totalBlockingTime",
+      "-largestContentfulPaint",
+    ];
+
+    for(let prop of sideQuestProperties) {
+      let [order, key] = [prop.slice(0, 1), prop.slice(1)];
+
+      let incrementRank = 1;
+      let incrementRankValue;
+
+      perfResults.sort((a, b) => {
+        if(order === "-") { // ascending, lower is better
+          return lodashGet(a, key) - lodashGet(b, key);
+        } else { // order === "+", descending, higher is better
+          return lodashGet(b, key) - lodashGet(a, key);
+        }
+      }).map((entry, index) => {
+        if(!entry.sidequests) {
+          entry.sidequests = {};
+        }
+
+        let value = lodashGet(entry, key);
+        if(!incrementRankValue) {
+          incrementRankValue = value;
+        } else if(incrementRankValue !== value) {
+          incrementRank++;
+        }
+        
+        entry.sidequests[prop] = incrementRank;
+        incrementRankValue = value;
+
+        return entry;
+      });
+    }
 
     let sortByPerfFn = this.sortByPerformance.bind(this);
     perfResults.sort(sortByPerfFn).map((entry, index) => {
