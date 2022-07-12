@@ -118,7 +118,14 @@ class ResultLogger {
 
   // image, script, document, font, stylesheets only (no videos, no third parties)
   getTiebreakerWeight(result) {
-    return result.weight.document + result.weight.stylesheet + result.weight.font + result.weight.image + result.weight.script;
+    let upperLimitImages = 400000; // bytes
+    let upperLimitFonts = 100000; // bytes
+
+    return result.weight.document +
+      result.weight.stylesheet +
+      result.weight.script +
+      Math.min(result.weight.font, upperLimitFonts) +
+      Math.min(result.weight.image, upperLimitImages);
   }
 
   // speed index per KB
