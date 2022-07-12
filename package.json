@@ -1,6 +1,6 @@
 {
   "name": "performance-leaderboard",
-  "version": "9.6.1-release.1",
+  "version": "9.6.3",
   "main": "performance-leaderboard.js",
   "scripts": {
     "sample": "node test/sample"
@@ -24,11 +24,11 @@
   },
   "homepage": "https://github.com/zachleat/performance-leaderboard#readme",
   "dependencies": {
-    "@axe-core/puppeteer": "^4.4.2",
+    "@axe-core/puppeteer": "^4.4.3",
     "chrome-launcher": "^0.15.1",
-    "lighthouse": "^9.6.1",
+    "lighthouse": "^9.6.3",
     "lodash.get": "^4.4.2",
-    "puppeteer": "^14.2.1",
+    "puppeteer": "^15.3.2",
     "slugify": "^1.6.5"
   }
 }
