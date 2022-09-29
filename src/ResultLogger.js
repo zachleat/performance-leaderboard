@@ -1,4 +1,5 @@
 const AxeTester = require("./AxeTester");
+const CarbonTester = require("./CarbonTester");
 const LighthouseMedianRun = require("../lib/lh-median-run.js");
 const lodashGet = require("lodash.get");
 
@@ -37,6 +38,14 @@ class ResultLogger {
 
   get axePuppeteerTimeout() {
     return this._axePuppeteerTimeout;
+  }
+
+  set carbonAudit(isEnabled) {
+    this._carbonAudit = isEnabled;
+  }
+
+  get carbonAudit() {
+    return this._carbonAudit;
   }
 
   _getGoodKeyCheckSort(a, b, key) {
@@ -376,12 +385,22 @@ class ResultLogger {
 
     // Insert accessibilityRank into perfResults
     let a11yResults = [];
+    let carbonResults = [];
     let axeTester = new AxeTester();
+    let carbonTester;
     axeTester.logDirectory = this.logDirectory;
     axeTester.writeLogs = this.writeLogs;
     axeTester.readFromLogs = this.readFromLogs;
     axeTester.puppeteerTimeout = this.axePuppeteerTimeout;
     axeTester.bypassAxe = this.bypassAxe;
+
+    // Carbon audit
+    if(this.carbonAudit) {
+      carbonTester = new CarbonTester();
+      carbonTester.logDirectory = this.logDirectory;
+      carbonTester.writeLogs = this.writeLogs;
+      carbonTester.readFromLogs = this.readFromLogs;
+    }
 
     await axeTester.start();
 
@@ -393,6 +412,15 @@ class ResultLogger {
       if(result) {
         console.log(`Axe scan (${++count} of ${size}) for ${url}`);
         result.axe = await axeTester.getResults(url);
+
+        if (carbonTester){
+          console.log(`CO2 scan (${count} of ${size}) for ${url}`);
+          const carbon = await carbonTester.getResults(url, perfResults[0].weight.total);
+          if(carbon) {
+            result.carbon = carbon;
+          }
+          carbonResults.push(result);
+        }
 
         a11yResults.push(result);
       }
@@ -414,7 +442,17 @@ class ResultLogger {
         }
       }
 
+
       a11yRank++;
+    }
+
+    // Carbon audit
+    for(let carbonResult of carbonResults) {
+      for(let perfResult of perfResults) {
+        if(perfResult.url === carbonResult.url) {
+          perfResult.carbon = carbonResult.carbon;
+        }
+      }
     }
 
     // Cumulative Score (must run after axe scores)
