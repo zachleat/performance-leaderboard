@@ -415,7 +415,7 @@ class ResultLogger {
 
         if (carbonTester){
           console.log(`CO2 scan (${count} of ${size}) for ${url}`);
-          const carbon = await carbonTester.getResults(url, perfResults[0].weight.total);
+          const carbon = await carbonTester.getResults(url, result.weight.total);
           if(carbon) {
             result.carbon = carbon;
           }
