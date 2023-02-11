@@ -128,11 +128,11 @@ In the return object you’ll see a `ranks` object listing how this site compare
 
 ## Changelog
 
-* `v4.0.0` Major version upgrade of `lighthouse` dependency from v6.5 to v7.2
-* `v4.1.0` Update `lighthouse` to v7.3
-* `v5.0.0` Update `lighthouse` to v8.0
-* `v5.1.0` Adds `axePuppeteerTimeout` option. Adds `carbonAudit` option.
-* `v5.2.0` Update `lighthouse` from v8.0 to v8.2
-* `v5.3.0` Update `lighthouse` from v8.2 to v8.5
+* `v10.0.0` Update [`lighthouse` to v10](https://github.com/GoogleChrome/lighthouse/releases/tag/v10.0.0), requires Node 16.
 * `v9.0.0` Update `lighthouse` to v9.0. Removes `carbonAudit`, upstream API was removed.
-* `v9.2.0` Update `lighthouse` to v9.2.
+* `v5.3.0` Update `lighthouse` from v8.2 to v8.5
+* `v5.2.0` Update `lighthouse` from v8.0 to v8.2
+* `v5.1.0` Adds `axePuppeteerTimeout` option. Adds `carbonAudit` option.
+* `v5.0.0` Update `lighthouse` to v8.0
+* `v4.1.0` Update `lighthouse` to v7.3
+* `v4.0.0` Major version upgrade of `lighthouse` dependency from v6.5 to v7.2
