@@ -2,6 +2,8 @@
 
 A plugin to run Lighthouse against a set of urls to see which site is the fastest.
 
+* See also: [`performance-leaderboard-pagespeed-insights`](https://github.com/zachleat/performance-leaderboard-pagespeed-insights/) (runs Lighthouse through PageSpeed Insights)
+
 ## Installation
 
 ```sh
