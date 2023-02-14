@@ -28,7 +28,7 @@
     "chrome-launcher": "^0.15.1",
     "lighthouse": "^10.0.0",
     "lodash.get": "^4.4.2",
-    "puppeteer": "^19.6.3",
+    "puppeteer": "^19.7.0",
     "slugify": "^1.6.5"
   }
 }
