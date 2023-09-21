@@ -130,6 +130,7 @@ In the return object you’ll see a `ranks` object listing how this site compare
 
 ## Changelog
 
+* `v11.0.0` Update [`lighthouse` to v11](https://github.com/GoogleChrome/lighthouse/releases/tag/v11.0.0), requires Node >= 18.16.
 * `v10.0.0` Update [`lighthouse` to v10](https://github.com/GoogleChrome/lighthouse/releases/tag/v10.0.0), requires Node 16.
 * `v9.0.0` Update `lighthouse` to v9.0. Removes `carbonAudit`, upstream API was removed.
 * `v5.3.0` Update `lighthouse` from v8.2 to v8.5
