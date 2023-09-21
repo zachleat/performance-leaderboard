@@ -1,6 +1,7 @@
 const AxeTester = require("./AxeTester");
 const LighthouseMedianRun = require("../lib/lh-median-run.js");
 const lodashGet = require("lodash.get");
+const byteSize = require('byte-size')
 
 class ResultLogger {
   constructor() {
@@ -204,14 +205,30 @@ class ResultLogger {
     });
   }
 
-  _getResultResourceSummaryItem(result, resourceType, prop) {
-    let details = result.audits['resource-summary'].details;
-    if(details) {
-      let items = details.items;
-      if(items && items.length) {
-        return items.filter(entry => entry.resourceType === resourceType)[0][prop];
+  _getResultResourceSummaryItem(items, resourceType, prop) {
+    let count = 0;
+    let size = 0;
+    if(items && items.length) {
+      let subItems = items;
+      if(resourceType) {
+        subItems = items.filter(entry => {
+          return (entry.resourceType || "").toLowerCase() === resourceType.toLowerCase();
+        });
+      }
+
+      for(let item of subItems) {
+        count++;
+        size += item.transferSize;
       }
     }
+    // prop: transferSize, requestCount
+    if(prop === "transferSize") {
+      return size;
+    }
+    if(prop === "requestCount") {
+      return count;
+    }
+    return NaN;
   }
 
   mapResult(result) {
@@ -225,6 +242,21 @@ class ResultLogger {
         error: "Unknown error."
       };
     }
+
+
+    let requestSummary = {
+      requestCount: 0,
+      transferSize: 0,
+    };
+
+    let networkItems = result.audits['network-requests'].details.items;
+    for (let request of networkItems) {
+      requestSummary.requestCount += 1;
+      requestSummary.transferSize += request.transferSize;
+    }
+    // 27 requests • 209 KiB
+    let normalizedTransferSize = byteSize(requestSummary.transferSize, { units: 'iec' });
+    let requestSummaryDisplayValue = `${requestSummary.requestCount} request${requestSummary.requestCount !== 1 ? "s" : ""} • ${normalizedTransferSize.value} ${normalizedTransferSize.unit}`;
 
     return {
       url: result.finalUrl,
@@ -252,19 +284,19 @@ class ResultLogger {
       maxPotentialFirstInputDelay: result.audits['max-potential-fid'].numericValue,
       timeToFirstByte: result.audits['server-response-time'].numericValue,
       weight: {
-        summary: result.audits['resource-summary'].displayValue,
+        summary: requestSummaryDisplayValue,
         total: result.audits['total-byte-weight'].numericValue,
-        image: this._getResultResourceSummaryItem(result, "image", "transferSize"),
-        imageCount: this._getResultResourceSummaryItem(result, "image", "requestCount"),
-        script: this._getResultResourceSummaryItem(result, "script", "transferSize"),
-        scriptCount: this._getResultResourceSummaryItem(result, "script", "requestCount"),
-        document: this._getResultResourceSummaryItem(result, "document", "transferSize"),
-        font: this._getResultResourceSummaryItem(result, "font", "transferSize"),
-        fontCount: this._getResultResourceSummaryItem(result, "font", "requestCount"),
-        stylesheet: this._getResultResourceSummaryItem(result, "stylesheet", "transferSize"),
-        stylesheetCount: this._getResultResourceSummaryItem(result, "stylesheet", "requestCount"),
-        thirdParty: this._getResultResourceSummaryItem(result, "third-party", "transferSize"),
-        thirdPartyCount: this._getResultResourceSummaryItem(result, "third-party", "requestCount"),
+        image: this._getResultResourceSummaryItem(networkItems, "image", "transferSize"),
+        imageCount: this._getResultResourceSummaryItem(networkItems, "image", "requestCount"),
+        script: this._getResultResourceSummaryItem(networkItems, "script", "transferSize"),
+        scriptCount: this._getResultResourceSummaryItem(networkItems, "script", "requestCount"),
+        document: this._getResultResourceSummaryItem(networkItems, "document", "transferSize"),
+        font: this._getResultResourceSummaryItem(networkItems, "font", "transferSize"),
+        fontCount: this._getResultResourceSummaryItem(networkItems, "font", "requestCount"),
+        stylesheet: this._getResultResourceSummaryItem(networkItems, "stylesheet", "transferSize"),
+        stylesheetCount: this._getResultResourceSummaryItem(networkItems, "stylesheet", "requestCount"),
+        thirdParty: this._getResultResourceSummaryItem(result.audits['third-party-summary'].details?.items, false, "transferSize"),
+        thirdPartyCount: this._getResultResourceSummaryItem(result.audits['third-party-summary'].details?.items, false, "requestCount"),
       },
     };
   }
@@ -358,7 +390,7 @@ class ResultLogger {
         } else if(incrementRankValue !== value) {
           incrementRank++;
         }
-        
+
         entry.sidequests[prop] = incrementRank;
         incrementRankValue = value;
 

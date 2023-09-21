@@ -42,7 +42,9 @@ class AxeTester {
   }
 
   async start() {
-    this.browser = await puppeteer.launch();
+    this.browser = await puppeteer.launch({
+      headless: "new"
+    });
   }
 
   getLogFilename(url) {

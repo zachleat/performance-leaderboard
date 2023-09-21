@@ -24,11 +24,12 @@
   },
   "homepage": "https://github.com/zachleat/performance-leaderboard#readme",
   "dependencies": {
-    "@axe-core/puppeteer": "^4.6.0",
-    "chrome-launcher": "^0.15.1",
-    "lighthouse": "^10.0.0",
+    "@axe-core/puppeteer": "^4.7.3",
+    "byte-size": "^8.1.1",
+    "chrome-launcher": "^0.15.2",
+    "lighthouse": "^11.1.0",
     "lodash.get": "^4.4.2",
-    "puppeteer": "^19.7.0",
-    "slugify": "^1.6.5"
+    "puppeteer": "^21.3.1",
+    "slugify": "^1.6.6"
   }
 }
