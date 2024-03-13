@@ -1,5 +1,4 @@
 const slugify = require("slugify");
-const chromeLauncher = require("chrome-launcher");
 const ResultLogger = require("./src/ResultLogger");
 const writeLog = require("./src/WriteLog");
 const readLog = require("./src/ReadLog");
@@ -11,6 +10,7 @@ const AXE_PUPPETEER_TIMEOUT = 30000;
 
 async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) {
   const { default: lighthouse } = await import("lighthouse");
+  const chromeLauncher = await import("chrome-launcher");
 
   let opts = Object.assign({
     writeLogs: true,
