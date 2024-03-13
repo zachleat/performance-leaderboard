@@ -1,16 +1,23 @@
 const slugify = require("slugify");
-const ResultLogger = require("./src/ResultLogger");
-const writeLog = require("./src/WriteLog");
-const readLog = require("./src/ReadLog");
-const chromePuppeteerPath = require("puppeteer").executablePath()
+const chromePuppeteerPath = require("puppeteer").executablePath();
+
+const ResultLogger = require("./src/ResultLogger.js");
+const writeLog = require("./src/WriteLog.js");
+const readLog = require("./src/ReadLog.js");
+const log = require("./src/LogUtil.js");
 
 const NUMBER_OF_RUNS = 3;
 const LOG_DIRECTORY = ".log";
 const AXE_PUPPETEER_TIMEOUT = 30000;
 
+// Fix for `ProtocolError: Protocol error (Target.getTargetInfo): 'Target.getTargetInfo' wasn't found`
+process.on("unhandledRejection", (error, promise) => {
+  log("Unhandled rejection in promise", error);
+});
+
 async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) {
-  const { default: lighthouse } = await import("lighthouse");
   const chromeLauncher = await import("chrome-launcher");
+  const { default: lighthouse } = await import("lighthouse");
 
   let opts = Object.assign({
     writeLogs: true,
@@ -19,7 +26,12 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
     axePuppeteerTimeout: AXE_PUPPETEER_TIMEOUT,
     bypassAxe: [], // skip axe checks
     // onlyCategories: ["performance", "accessibility"],
-    chromeFlags: ['--headless', '--disable-dev-shm-usage'],
+    chromeFlags: [
+      '--headless',
+      '--disable-dev-shm-usage',
+      '--ignore-certificate-errors',
+      '--no-enable-error-reporting',
+    ],
     freshChrome: "site", // or "run"
     launchOptions: {},
     // callback before each lighthouse test
@@ -29,6 +41,7 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
     // deprecated
     resultHook: function(result) {}, // async compatible
   }, options);
+
   let config = null;
 
   let resultLog = new ResultLogger();
@@ -38,13 +51,14 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
   resultLog.axePuppeteerTimeout = opts.axePuppeteerTimeout;
   resultLog.bypassAxe = opts.bypassAxe;
 
-  console.log( `Testing ${urls.length} site${urls.length !== 1 ? "s" : ""}:` );
+  log( `Testing ${urls.length} site${urls.length !== 1 ? "s" : ""}:` );
 
   // SpeedIndex was much lower on repeat runs if we don’t
   // kill the chrome instance between runs of the same site
   for(let j = 0; j < numberOfRuns; j++) {
     let count = 0;
     let chrome;
+    let portNumber;
 
     if(!opts.readFromLogDirectory && opts.freshChrome === "run") {
       chrome = await chromeLauncher.launch(Object.assign({
@@ -52,7 +66,8 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
         // reuse puppeteer chrome path
         chromePath: chromePuppeteerPath,
       }, opts.launchOptions));
-      opts.port = chrome.port;
+
+      portNumber = chrome.port;
     }
     for(let url of urls) {
       if(!opts.readFromLogDirectory && opts.freshChrome === "site") {
@@ -61,10 +76,11 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
           // reuse puppeteer chrome path
           chromePath: chromePuppeteerPath,
         }, opts.launchOptions));
-        opts.port = chrome.port;
+
+        portNumber = chrome.port;
       }
 
-      console.log( `(Site ${++count} of ${urls.length}, run ${j+1} of ${numberOfRuns}): ${url}` );
+      log( `Lighthouse ${++count}/${urls.length} Run ${j+1}/${numberOfRuns}: ${url}` );
 
       if(opts.beforeHook && typeof opts.beforeHook === "function") {
         await opts.beforeHook(url);
@@ -77,7 +93,12 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
         if(opts.readFromLogDirectory) {
           rawResult = readLog(filename, opts.logDirectory);
         } else {
-          rawResult = await lighthouse(url, opts, config).then(results => results.lhr);
+          let { lhr } = await lighthouse(url, {
+            // logLevel: "info",
+            port: portNumber,
+          }, config);
+
+          rawResult = lhr;
 
           if(opts.writeLogs) {
             await writeLog(filename, rawResult, opts.logDirectory);
@@ -91,7 +112,7 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
 
         resultLog.add(url, rawResult);
       } catch(e) {
-        console.log( `Logged an error with ${url}: `, e );
+        log( `Logged an error with ${url}: `, e );
         resultLog.addError(url, e);
       }
 

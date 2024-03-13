@@ -2,8 +2,9 @@ const PerfLeaderboard = require("../.");
 
 (async function() {
 	let urls = [
-		"https://www.gatsbyjs.com/",
+		"https://www.tattooed.dev/",
 		"https://www.11ty.dev/",
+		// "https://www.gatsbyjs.com/",
 		// "https://vuejs.org/",
 		// "https://reactjs.org/",
 		// "https://nextjs.org/",

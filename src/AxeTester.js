@@ -1,8 +1,10 @@
-const { AxePuppeteer } = require("@axe-core/puppeteer");
-const puppeteer = require("puppeteer");
-const writeLog = require("./WriteLog");
-const readLog = require("./ReadLog");
 const slugify = require("slugify");
+const puppeteer = require("puppeteer");
+const { AxePuppeteer } = require("@axe-core/puppeteer");
+
+const writeLog = require("./WriteLog.js");
+const readLog = require("./ReadLog.js");
+const log = require("./LogUtil.js");
 
 class AxeTester {
   constructor() {
@@ -110,7 +112,7 @@ class AxeTester {
         return await this.fetchNewResults(url);
       }
     } catch(e) {
-      console.log( `Axe error with ${url}`, e );
+      log( `Axe error with ${url}`, e );
       if(this.page) {
         await this.page.close();
       }

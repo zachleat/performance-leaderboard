@@ -1,7 +1,9 @@
-const AxeTester = require("./AxeTester");
-const LighthouseMedianRun = require("../lib/lh-median-run.js");
 const lodashGet = require("lodash.get");
-const byteSize = require('byte-size')
+const byteSize = require('byte-size');
+
+const AxeTester = require("./AxeTester.js");
+const LighthouseMedianRun = require("../lib/lh-median-run.js");
+const log = require("./LogUtil.js");
 
 class ResultLogger {
   constructor() {
@@ -423,7 +425,7 @@ class ResultLogger {
       let result = this.getLowestResultForUrl(url, this.sortByAccessibilityBeforeAxe.bind(this));
 
       if(result) {
-        console.log(`Axe scan (${++count} of ${size}) for ${url}`);
+        log(`Axe scan ${++count}/${size}: ${url}`);
         result.axe = await axeTester.getResults(url);
 
         a11yResults.push(result);
