@@ -107,10 +107,13 @@ async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) 
 
         let afterHook = opts.afterHook || opts.resultHook; // resultHook is deprecated (renamed)
         if(afterHook && typeof afterHook === "function") {
-          await afterHook(resultLog.mapResult(rawResult), rawResult);
+          let ret = await afterHook(resultLog.mapResult(rawResult), rawResult);
+          if(ret !== false) {
+            resultLog.add(url, rawResult);
+          }
+        } else {
+          resultLog.add(url, rawResult);
         }
-
-        resultLog.add(url, rawResult);
       } catch(e) {
         log( `Logged an error with ${url}: `, e );
         resultLog.addError(url, e);
