@@ -234,14 +234,21 @@ class ResultLogger {
   }
 
   mapResult(result) {
-    // Bad certificate, maybe
-    if(result.categories.performance.score === null &&
-      result.categories.accessibility.score === null &&
-      result.categories['best-practices'].score === null &&
-      result.categories.seo.score === null) {
+    let category = result?.categories;
+    if(!category) {
       return {
         url: result.finalUrl,
-        error: "Unknown error."
+        error: "Unknown error (no result categories)."
+      };
+    }
+    // Bad certificate, maybe
+    if(!category?.performance?.score &&
+      !category?.accessibility?.score &&
+      !category?.['best-practices']?.score &&
+      !category?.seo?.score) {
+      return {
+        url: result.finalUrl,
+        error: "Unknown error (no scores)."
       };
     }
 
