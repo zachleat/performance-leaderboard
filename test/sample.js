@@ -1,3 +1,4 @@
+// const PerfLeaderboard = require("performance-leaderboard");
 const PerfLeaderboard = require("../.");
 
 (async function() {
