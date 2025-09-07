@@ -76,7 +76,7 @@ class ResultLogger {
     }
 
     // We want the lowest score here
-    return a.lighthouse.accessibility - b.lighthouse.accessibility;
+    return (a?.lighthouse?.accessibility || 0) - (b?.lighthouse?.accessibility || 0);
   }
 
   sortByAccessibility(a, b) {
@@ -84,7 +84,7 @@ class ResultLogger {
       return this._getBadKeyCheckSort(a, b, "error");
     }
 
-    if(b.lighthouse.accessibility === a.lighthouse.accessibility) {
+    if(b?.lighthouse?.accessibility === a?.lighthouse?.accessibility) {
       if(!a.axe || !b.axe) {
         return this._getGoodKeyCheckSort(a, b, "axe");
       }
@@ -103,7 +103,7 @@ class ResultLogger {
       return a.axe.violations - b.axe.violations;
     }
 
-    return b.lighthouse.accessibility - a.lighthouse.accessibility;
+    return b?.lighthouse?.accessibility - a?.lighthouse?.accessibility;
   }
 
   sortByPerformance(a, b) {
@@ -111,12 +111,12 @@ class ResultLogger {
       return this._getBadKeyCheckSort(a, b, "error");
     }
 
-    if(b.lighthouse.performance === a.lighthouse.performance) {
+    if(b?.lighthouse?.performance === a?.lighthouse?.performance) {
       // lower speed index scores are better
       return a.speedIndex - b.speedIndex;
     }
     // higher lighthouse scores are better
-    return b.lighthouse.performance - a.lighthouse.performance;
+    return b?.lighthouse?.performance - a?.lighthouse?.performance;
   }
 
   // image, script, document, font, stylesheets only (no videos, no third parties)
@@ -140,7 +140,7 @@ class ResultLogger {
   }
 
   getLighthouseSum(result) {
-    return result.lighthouse.performance + result.lighthouse.accessibility + result.lighthouse.seo + result.lighthouse.bestPractices;
+    return result?.lighthouse?.performance + result?.lighthouse?.accessibility + result?.lighthouse?.seo + result?.lighthouse?.bestPractices;
   }
 
   sortByTotalHundos(a, b) {
@@ -241,6 +241,7 @@ class ResultLogger {
         error: "Unknown error (no result categories)."
       };
     }
+
     // Bad certificate, maybe
     if(!category?.performance?.score &&
       !category?.accessibility?.score &&
@@ -312,7 +313,7 @@ class ResultLogger {
 
   getMedianResultForUrl(url) {
     if(this.results[url] && this.results[url].length) {
-      let goodResults = this.results[url].filter(entry => entry && !entry.error && entry.lighthouse.performance !== null);
+      let goodResults = this.results[url].filter(entry => entry && !entry.error && entry?.lighthouse?.performance !== null);
 
       goodResults = goodResults.map((entry, j) => {
         entry.run = {
@@ -449,9 +450,15 @@ class ResultLogger {
         if(perfResult.url === a11yResult.url) {
           // overwrite the original Accessibility Score
           // as the lowest a11y result of X runs may be different than the median performance result from X runs
-          perfResult.lighthouse.accessibility = a11yResult.lighthouse.accessibility;
-          perfResult.ranks.accessibility = a11yRank;
-          perfResult.axe = a11yResult.axe;
+          if(perfResult) {
+            if(perfResult.lighthouse) {
+              perfResult.lighthouse.accessibility = a11yResult.lighthouse.accessibility;
+            }
+            if(perfResult.ranks) {
+              perfResult.ranks.accessibility = a11yRank;
+            }
+            perfResult.axe = a11yResult.axe;
+          }
         }
       }
 
