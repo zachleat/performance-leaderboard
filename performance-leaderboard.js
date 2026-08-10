@@ -1,5 +1,4 @@
 const slugify = require("slugify");
-const chromePuppeteerPath = require("puppeteer").executablePath();
 
 const ResultLogger = require("./src/ResultLogger.js");
 const writeLog = require("./src/WriteLog.js");
@@ -18,6 +17,9 @@ process.on("unhandledRejection", (error, promise) => {
 async function runLighthouse(urls, numberOfRuns = NUMBER_OF_RUNS, options = {}) {
   const chromeLauncher = await import("chrome-launcher");
   const { default: lighthouse } = await import("lighthouse");
+
+  // Puppeteer v25+ returns a Promise here
+  const chromePuppeteerPath = await require("puppeteer").executablePath();
 
   let opts = Object.assign({
     writeLogs: true,

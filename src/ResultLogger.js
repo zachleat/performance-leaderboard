@@ -264,6 +264,9 @@ class ResultLogger {
       requestSummary.requestCount += 1;
       requestSummary.transferSize += request.transferSize;
     }
+    // `third-party-summary` was renamed to `third-parties-insight` in Lighthouse v13
+    let thirdPartyItems = (result.audits['third-party-summary'] || result.audits['third-parties-insight'])?.details?.items;
+
     // 27 requests • 209 KiB
     let normalizedTransferSize = byteSize(requestSummary.transferSize, { units: 'iec' });
     let requestSummaryDisplayValue = `${requestSummary.requestCount} request${requestSummary.requestCount !== 1 ? "s" : ""} • ${normalizedTransferSize.value} ${normalizedTransferSize.unit}`;
@@ -285,7 +288,8 @@ class ResultLogger {
           result.categories.seo.score * 100
       },
       firstContentfulPaint: result.audits['first-contentful-paint'].numericValue,
-      firstMeaningfulPaint: result.audits['first-meaningful-paint'].numericValue,
+      // `first-meaningful-paint` was removed in Lighthouse v13
+      firstMeaningfulPaint: result.audits['first-meaningful-paint']?.numericValue,
       speedIndex: result.audits['speed-index'].numericValue,
       largestContentfulPaint: result.audits['largest-contentful-paint'].numericValue,
       totalBlockingTime: result.audits['total-blocking-time'].numericValue,
@@ -305,8 +309,8 @@ class ResultLogger {
         fontCount: this._getResultResourceSummaryItem(networkItems, "font", "requestCount"),
         stylesheet: this._getResultResourceSummaryItem(networkItems, "stylesheet", "transferSize"),
         stylesheetCount: this._getResultResourceSummaryItem(networkItems, "stylesheet", "requestCount"),
-        thirdParty: this._getResultResourceSummaryItem(result.audits['third-party-summary'].details?.items, false, "transferSize"),
-        thirdPartyCount: this._getResultResourceSummaryItem(result.audits['third-party-summary'].details?.items, false, "requestCount"),
+        thirdParty: this._getResultResourceSummaryItem(thirdPartyItems, false, "transferSize"),
+        thirdPartyCount: this._getResultResourceSummaryItem(thirdPartyItems, false, "requestCount"),
       },
     };
   }
