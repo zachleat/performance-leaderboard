@@ -1,5 +1,8 @@
 # performance-leaderboard
 
+> [!TIP]
+> This package (used by an older version of `speedlify`) is now retired. A newer version of `speedlify` is available: check out [**`speedlify2`**](https://github.com/zachleat/speedlify2).
+
 A plugin to run Lighthouse against a set of urls to see which site is the fastest.
 
 * ~~See also: [`performance-leaderboard-pagespeed-insights`](https://github.com/zachleat/performance-leaderboard-pagespeed-insights/) (runs Lighthouse through PageSpeed Insights)~~
